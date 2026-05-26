@@ -39,13 +39,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore Itm.Distributed.System.sln
 
       - name: Build solution
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build Itm.Distributed.System.sln --no-restore --configuration Release
 
       - name: Run tests
-        run: dotnet test --no-build --configuration Release --verbosity normal
+        run: dotnet test Itm.Distributed.System.sln --no-build --configuration Release --verbosity normal
         continue-on-error: true
 
       - name: Login to Docker Hub
