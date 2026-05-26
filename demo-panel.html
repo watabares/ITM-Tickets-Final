@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITM-Tickets - Panel de Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #1a237e; --accent: #00bcd4; --success: #4caf50; --danger: #f44336; --warning: #ff9800; }
+        body { background: #0d1117; color: #e6edf3; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: var(--primary) !important; }
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; }
+        .card-header { background: #21262d; border-bottom: 1px solid #30363d; font-weight: 600; }
+        .btn-demo { border-radius: 8px; font-weight: 500; transition: all 0.2s; }
+        .btn-demo:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .output-box { background: #0d1117; border: 1px solid #30363d; border-radius: 8px;
+            font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 13px;
+            max-height: 300px; overflow-y: auto; padding: 12px; white-space: pre-wrap; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .dot-green { background: var(--success); }
+        .dot-red { background: var(--danger); }
+        .dot-yellow { background: var(--warning); }
+        .section-title { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        .badge-proto { font-size: 0.7rem; }
+        .timer { font-size: 0.8rem; color: #8b949e; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-dark px-4 py-2">
+    <span class="navbar-brand mb-0 h4"><i class="fas fa-ticket-alt me-2"></i>ITM-Tickets — Panel de Sustentación</span>
+    <span class="text-light small">Festival de los Dos Mundos 2026 | Nivel 5</span>
+</nav>
+
+<div class="container-fluid px-4 py-3">
+    <!-- Status Bar -->
+    <div class="row mb-3" id="statusBar">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body py-2 d-flex align-items-center gap-4 flex-wrap">
+                    <span class="section-title me-3"><i class="fas fa-heartbeat"></i> Estado</span>
+                    <span id="svcInventory"><span class="status-dot dot-yellow"></span> Inventory</span>
+                    <span id="svcOrder"><span class="status-dot dot-yellow"></span> Order</span>
+</div></div></div></div>
+
+    <!-- Row 1: Compra + SAGA -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="fas fa-shopping-cart me-2"></i>1. Compra de Boleta (SAGA + gRPC)</div>
+                <div class="card-body">
+                    <div class="row g-2 mb-3">
+                        <div class="col-auto">
+                            <select id="selProducto" class="form-select form-select-sm">
+                                <option value="1">Boleta VIP Medellín ($150,000 COP)</option>
+                                <option value="2">Boleta General Medellín ($80,000 COP)</option>
+                                <option value="3">Boleta VIP Madrid (€85)</option>
+                                <option value="4">Boleta General Madrid (€45)</option>
+                                <option value="5">Combo Dos Mundos ($200,000 COP)</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <select id="selSede" class="form-select form-select-sm">
+                                <option value="Medellin">Medellín</option>
+                                <option value="Madrid">Madrid</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-success btn-demo btn-sm" onclick="comprarBoleta()">
+                                <i class="fas fa-bolt me-1"></i>Comprar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="output-box" id="outputCompra">Esperando acción...</div>
+                    <div class="timer mt-1" id="timerCompra"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="fas fa-search me-2"></i>5. Búsqueda Semántica (IA)</div>
+                <div class="card-body">
+                    <div class="input-group input-group-sm mb-3">
+                        <input type="text" id="txtSearch" class="form-control" placeholder="algo divertido para la familia" value="algo divertido para la familia">
+                        <button class="btn btn-info btn-demo" onclick="buscarSemantico()"><i class="fas fa-brain me-1"></i>Buscar</button>
+                    </div>
+                    <div class="d-flex gap-2 mb-2">
+                        <button class="btn btn-outline-light btn-sm" onclick="document.getElementById('txtSearch').value='concierto en madrid';buscarSemantico()">concierto madrid</button>
+                        <button class="btn btn-outline-light btn-sm" onclick="document.getElementById('txtSearch').value='fiesta electronica noche';buscarSemantico()">fiesta noche</button>
+                        <button class="btn btn-outline-light btn-sm" onclick="document.getElementById('txtSearch').value='aprender musica';buscarSemantico()">aprender música</button>
+                    </div>
+                    <div class="output-box" id="outputSearch">Esperando acción...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Redis + Correlation ID -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="fas fa-database me-2 text-danger"></i>3. Redis Cache (Latencia)</div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">Primera llamada = cache miss (va a Price.Api). Segunda = cache hit (Redis).</p>
+                    <button class="btn btn-warning btn-demo btn-sm mb-2" onclick="testRedis()">
+                        <i class="fas fa-tachometer-alt me-1"></i>Probar Cache (2 llamadas)
+                    </button>
+                    <div class="output-box" id="outputRedis">Esperando acción...</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="fas fa-link me-2 text-info"></i>2. Correlation ID (3 servicios)</div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">El mismo ID viaja por Order → Inventory (gRPC) → Notification (RabbitMQ).</p>
+                    <button class="btn btn-info btn-demo btn-sm mb-2" onclick="testCorrelation()">
+                        <i class="fas fa-project-diagram me-1"></i>Mostrar Correlation ID
+                    </button>
+                    <div class="output-box" id="outputCorrelation">Esperando acción...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 3: K8s Self-healing + Terraform -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="fas fa-skull-crossbones me-2 text-danger"></i>3. Self-Healing (Kill Pod)</div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">Mata un pod de Order.Api y observa cómo K8s lo recrea automáticamente.</p>
+                    <div class="d-flex gap-2 mb-2">
+                        <button class="btn btn-danger btn-demo btn-sm" onclick="killPod()">
+                            <i class="fas fa-bomb me-1"></i>Matar Pod
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="getPods()">
+                            <i class="fas fa-sync me-1"></i>Ver Pods
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="getHPA()">
+                            <i class="fas fa-chart-line me-1"></i>Ver HPA
+                        </button>
+                    </div>
+                    <div class="output-box" id="outputK8s">Esperando acción...</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header"><i class="fas fa-cloud me-2 text-warning"></i>4. Terraform (IaC)</div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">Muestra el plan de infraestructura AWS EKS sin ejecutarlo.</p>
+                    <button class="btn btn-outline-warning btn-demo btn-sm mb-2" onclick="showTerraform()">
+                        <i class="fas fa-file-code me-1"></i>Ver main.tf
+                    </button>
+                    <div class="output-box" id="outputTerraform">Esperando acción...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 4: Seed + Health -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-seedling me-2"></i>Setup</div>
+                <div class="card-body">
+                    <button class="btn btn-outline-success btn-sm btn-demo w-100 mb-2" onclick="seedSearch()">
+                        <i class="fas fa-database me-1"></i>Seed Búsqueda (Elasticsearch + Qdrant)
+                    </button>
+                    <button class="btn btn-outline-info btn-sm btn-demo w-100" onclick="checkHealth()">
+                        <i class="fas fa-heartbeat me-1"></i>Health Check (todos)
+                    </button>
+                    <div class="output-box mt-2" id="outputSetup" style="max-height:150px">Esperando acción...</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-list-check me-2"></i>Checklist Sustentación (15 min)</div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="chk1"><label class="form-check-label small" for="chk1">Min 0-3: Compra exitosa + gRPC latencia</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="chk2"><label class="form-check-label small" for="chk2">Min 3-6: Correlation ID en 3 servicios</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="chk3"><label class="form-check-label small" for="chk3">Min 6-9: Kill pod + self-healing</label></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="chk4"><label class="form-check-label small" for="chk4">Min 9-12: Terraform plan</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="chk5"><label class="form-check-label small" for="chk5">Min 12-15: Búsqueda semántica + Redis</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="chk6"><label class="form-check-label small" for="chk6">Mostrar GitHub Actions (pipeline verde)</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const BASE = 'http://localhost';
+const PORTS = { order: 5027, inventory: 5293, product: 5298, price: 5012, search: 5100, gateway: 5110, notification: 5089 };
+
+function log(id, msg, append = false) {
+    const el = document.getElementById(id);
+    if (append) el.textContent += '\n' + msg;
+    else el.textContent = msg;
+    el.scrollTop = el.scrollHeight;
+}
+
+async function comprarBoleta() {
+    const productId = document.getElementById('selProducto').value;
+    const sede = document.getElementById('selSede').value;
+    log('outputCompra', '⏳ Enviando orden...');
+    const start = performance.now();
+    try {
+        const res = await fetch(`${BASE}:${PORTS.order}/api/orders`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: parseInt(productId), quantity: 1, sede })
+        });
+        const data = await res.json();
+        const elapsed = (performance.now() - start).toFixed(0);
+        if (res.ok) {
+            log('outputCompra', `✅ COMPRA EXITOSA (${elapsed}ms total)\n\n` + JSON.stringify(data, null, 2));
+            document.getElementById('timerCompra').textContent = `gRPC: ${data.inventoryLatencyMs}ms | Total: ${elapsed}ms | Protocol: ${data.protocol}`;
+        } else {
+            log('outputCompra', `⚠️ SAGA COMPENSACIÓN (${elapsed}ms)\n\n` + JSON.stringify(data, null, 2));
+            document.getElementById('timerCompra').textContent = `Pago falló → Stock devuelto via ${data.protocol || 'gRPC'} | ${elapsed}ms`;
+        }
+    } catch (e) {
+        log('outputCompra', `❌ Error de conexión: ${e.message}\n\n¿Está Order.Api corriendo en puerto ${PORTS.order}?`);
+    }
+}
+
+async function buscarSemantico() {
+    const q = document.getElementById('txtSearch').value;
+    log('outputSearch', '⏳ Buscando con IA...');
+    try {
+        const res = await fetch(`${BASE}:${PORTS.search}/api/search/semantic?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        let output = `🧠 Búsqueda semántica: "${q}"\n🔍 Motor: ${data.engine}\n📊 Resultados: ${data.count}\n\n`;
+        data.results.forEach((r, i) => {
+            output += `${i+1}. ${r.name} (${r.city}) — Score: ${(r.score*100).toFixed(1)}%\n   ${r.description}\n   💰 ${r.price}\n\n`;
+        });
+        log('outputSearch', output);
+    } catch (e) {
+        log('outputSearch', `❌ Error: ${e.message}\n\n¿Ejecutaste el Seed primero?`);
+    }
+}
+
+async function testRedis() {
+    log('outputRedis', '⏳ Primera llamada (cache miss)...');
+    try {
+        const start1 = performance.now();
+        const res1 = await fetch(`${BASE}:${PORTS.product}/api/products/1`);
+        const data1 = await res1.json();
+        const t1 = (performance.now() - start1).toFixed(0);
+
+        log('outputRedis', `1️⃣ Primera llamada: ${t1}ms (cache MISS → fue a Price.Api)\n` + JSON.stringify(data1, null, 2));
+
+        await new Promise(r => setTimeout(r, 500));
+
+        const start2 = performance.now();
+        const res2 = await fetch(`${BASE}:${PORTS.product}/api/products/1`);
+        const data2 = await res2.json();
+        const t2 = (performance.now() - start2).toFixed(0);
+
+        log('outputRedis', `1️⃣ Primera llamada: ${t1}ms (cache MISS)\n2️⃣ Segunda llamada: ${t2}ms (cache HIT ← Redis)\n\n⚡ Diferencia: ${t1 - t2}ms más rápido con cache\n\n` + JSON.stringify(data2, null, 2));
+    } catch (e) {
+        log('outputRedis', `❌ Error: ${e.message}`);
+    }
+}
+</script>
+
+<script>
+async function testCorrelation() {
+    log('outputCorrelation', '⏳ Ejecutando compra para capturar Correlation ID...');
+    try {
+        const res = await fetch(`${BASE}:${PORTS.order}/api/orders`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: 1, quantity: 1, sede: 'Medellin' })
+        });
+        const data = await res.json();
+        const corrId = data.correlationId || data.extensions?.correlationId || 'N/A';
+        let output = `🔗 Correlation ID: ${corrId}\n\n`;
+        output += `📍 Viaje del ID por los servicios:\n`;
+        output += `┌─────────────────────────────────────────────┐\n`;
+        output += `│ 1. Gateway.Api    → Genera/propaga el ID    │\n`;
+        output += `│ 2. Order.Api      → Log: [${corrId}]       │\n`;
+        output += `│ 3. Inventory.Api  → gRPC context con ID     │\n`;
+        output += `│ 4. Notification   → Consumer recibe el ID   │\n`;
+        output += `└─────────────────────────────────────────────┘\n\n`;
+        output += `📋 Respuesta completa:\n` + JSON.stringify(data, null, 2);
+        log('outputCorrelation', output);
+    } catch (e) {
+        log('outputCorrelation', `❌ Error: ${e.message}`);
+    }
+}
+
+async function killPod() {
+    log('outputK8s', '💀 Matando pods de order-api...\n\nEjecuta en tu terminal:\n\n  kubectl delete pod -l app=order-api -n itm-tickets\n\nLuego haz click en "Ver Pods" para ver cómo K8s los recrea.');
+}
+
+async function getPods() {
+    log('outputK8s', '📋 Ejecuta en tu terminal:\n\n  kubectl get pods -n itm-tickets\n\nResultado esperado: todos los pods en Running, los nuevos con AGE de pocos segundos.');
+}
+
+async function getHPA() {
+    log('outputK8s', '📊 Ejecuta en tu terminal:\n\n  kubectl get hpa -n itm-tickets\n\nResultado esperado:\n  gateway-hpa     2-10 réplicas (CPU 70%)\n  inventory-hpa   2-10 réplicas (CPU 65%)\n  order-hpa       2-15 réplicas (CPU 60%)\n  product-hpa     2-8  réplicas (CPU 70%)');
+}
+
+function showTerraform() {
+    const tf = `# terraform/main.tf — Infraestructura como Código
+# ================================================
+
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+  tags = { Name = "itm-tickets-vpc", Project = "ITM-Tickets" }
+}
+
+resource "aws_eks_cluster" "main" {
+  name     = "itm-tickets-cluster"
+  role_arn = aws_iam_role.eks_cluster.arn
+  version  = "1.29"
+  vpc_config { subnet_ids = [aws_subnet.public_a.id, aws_subnet.public_b.id] }
+}
+
+resource "aws_eks_node_group" "workers" {
+  cluster_name    = aws_eks_cluster.main.name
+  instance_types  = ["t3.medium"]
+  scaling_config {
+    desired_size = 3
+    min_size     = 2    # Mínimo 2 nodos siempre
+    max_size     = 6    # Escala hasta 6 bajo carga
+  }
+}
+
+# Comando para aplicar:
+#   terraform init
+#   terraform plan    ← Solo muestra qué haría
+#   terraform apply   ← Crea la infraestructura real en AWS`;
+    log('outputTerraform', tf);
+}
+
+async function seedSearch() {
+    log('outputSetup', '⏳ Indexando eventos en Elasticsearch + Qdrant...');
+    try {
+        const res = await fetch(`${BASE}:${PORTS.search}/api/search/seed`, { method: 'POST' });
+        const data = await res.json();
+        log('outputSetup', `✅ ${data.message}\n\n10 eventos del festival indexados en ambos motores.`);
+    } catch (e) {
+        log('outputSetup', `❌ Error: ${e.message}\n\n¿Está Search.Api corriendo?`);
+    }
+}
+
+async function checkHealth() {
+    log('outputSetup', '⏳ Verificando salud de servicios...');
+    const services = [
+        { name: 'Inventory', port: PORTS.inventory },
+        { name: 'Order', port: PORTS.order },
+        { name: 'Product', port: PORTS.product },
+        { name: 'Price', port: PORTS.price },
+        { name: 'Search', port: PORTS.search },
+        { name: 'Notification', port: PORTS.notification }
+    ];
+    let output = '';
+    for (const svc of services) {
+        try {
+            const res = await fetch(`${BASE}:${svc.port}/health`, { signal: AbortSignal.timeout(3000) });
+            output += `✅ ${svc.name} (${svc.port}) — ${res.status === 200 ? 'Healthy' : res.status}\n`;
+        } catch (e) {
+            output += `❌ ${svc.name} (${svc.port}) — No responde\n`;
+        }
+    }
+    log('outputSetup', output);
+}
+
+// Auto health check on load
+window.addEventListener('load', () => {
+    setTimeout(checkHealth, 1000);
+});
+</script>
+</body>
+</html>
