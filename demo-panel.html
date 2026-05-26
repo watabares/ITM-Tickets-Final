@@ -7,29 +7,48 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #1a237e; --accent: #00bcd4; --success: #4caf50; --danger: #f44336; --warning: #ff9800; }
-        body { background: #0d1117; color: #e6edf3; font-family: 'Segoe UI', sans-serif; }
-        .navbar { background: var(--primary) !important; }
-        .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; }
-        .card-header { background: #21262d; border-bottom: 1px solid #30363d; font-weight: 600; }
+        :root { --primary: #00843D; --primary-dark: #006630; --accent: #FFD100; --success: #4caf50; --danger: #f44336; --warning: #ff9800; }
+        body { background: #f5f7fa; color: #1a1a2e; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: var(--primary) !important; border-bottom: 3px solid var(--accent); }
+        .navbar-brand { font-weight: 700; }
+        .card { background: #ffffff; border: 1px solid #dee2e6; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card-header { background: var(--primary); color: #ffffff; border-bottom: none; font-weight: 600; border-radius: 12px 12px 0 0 !important; }
         .btn-demo { border-radius: 8px; font-weight: 500; transition: all 0.2s; }
-        .btn-demo:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        .output-box { background: #0d1117; border: 1px solid #30363d; border-radius: 8px;
+        .btn-demo:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn-success { background: var(--primary) !important; border-color: var(--primary) !important; }
+        .btn-success:hover { background: var(--primary-dark) !important; }
+        .output-box { background: #1e1e2e; color: #e6edf3; border: 1px solid #dee2e6; border-radius: 8px;
             font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 13px;
             max-height: 300px; overflow-y: auto; padding: 12px; white-space: pre-wrap; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
         .dot-green { background: var(--success); }
         .dot-red { background: var(--danger); }
-        .dot-yellow { background: var(--warning); }
-        .section-title { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        .dot-yellow { background: var(--accent); }
+        .section-title { color: var(--primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
         .badge-proto { font-size: 0.7rem; }
-        .timer { font-size: 0.8rem; color: #8b949e; }
+        .timer { font-size: 0.8rem; color: #6c757d; }
+        .form-select, .form-control { background: #ffffff; color: #1a1a2e; border-color: #ced4da; }
+        .form-select:focus, .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(0,132,61,0.25); }
+        .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+        .btn-info { background: #0d6efd !important; border-color: #0d6efd !important; color: white !important; }
+        .btn-info:hover { background: #0b5ed7 !important; }
+        .itm-badge { background: var(--accent); color: #000; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
+        .btn-outline-light { border-color: #6c757d; color: #1a1a2e; }
+        .btn-outline-light:hover { background: #e9ecef; color: #1a1a2e; border-color: #6c757d; }
+        .btn-outline-success { border-color: var(--primary); color: var(--primary); }
+        .btn-outline-success:hover { background: var(--primary); color: white; }
+        .btn-outline-info { border-color: #0d6efd; color: #0d6efd; }
+        .btn-outline-info:hover { background: #0d6efd; color: white; }
+        .btn-outline-warning { border-color: var(--warning); color: #856404; }
+        .btn-outline-warning:hover { background: var(--warning); color: #000; }
+        .text-muted { color: #6c757d !important; }
+        .small, small { color: #495057; }
     </style>
 </head>
 <body>
 <nav class="navbar navbar-dark px-4 py-2">
     <span class="navbar-brand mb-0 h4"><i class="fas fa-ticket-alt me-2"></i>ITM-Tickets — Panel de Sustentación</span>
-    <span class="text-light small">Festival de los Dos Mundos 2026 | Nivel 5</span>
+    <span class="text-light small"><span class="itm-badge me-2">ITM</span> Programación Distribuida | Festival de los Dos Mundos 2026</span>
 </nav>
 
 <div class="container-fluid px-4 py-3">
@@ -37,7 +56,7 @@
     <div class="row mb-3" id="statusBar">
         <div class="col-12">
             <div class="card">
-                <div class="card-body py-2 d-flex align-items-center gap-4 flex-wrap">
+                <div class="card-body py-2 d-flex align-items-center gap-4 flex-wrap" style="background:#f8f9fa; border-radius:12px;">
                     <span class="section-title me-3"><i class="fas fa-heartbeat"></i> Estado</span>
                     <span id="svcInventory"><span class="status-dot dot-yellow"></span> Inventory</span>
                     <span id="svcOrder"><span class="status-dot dot-yellow"></span> Order</span>
@@ -198,8 +217,17 @@
 </div>
 
 <script>
-const BASE = 'http://localhost';
-const PORTS = { order: 5027, inventory: 5293, product: 5298, price: 5012, search: 5100, gateway: 5110, notification: 5089 };
+const BASE = '';  // Relative paths through nginx proxy (or set to http://localhost for direct)
+const PORTS = { order: '', inventory: '', product: '', price: '', search: '', gateway: '', notification: '' };
+const DIRECT = { order: 'http://localhost:5027', inventory: 'http://localhost:5293', product: 'http://localhost:5298', price: 'http://localhost:5012', search: 'http://localhost:5100', gateway: 'http://localhost:5110', notification: 'http://localhost:5089' };
+
+// Auto-detect: if served from nginx proxy (port 8080), use relative paths. Otherwise use direct.
+const useProxy = (window.location.port === '8080');
+
+function svcUrl(service, path) {
+    if (useProxy) return path;  // nginx proxies /api/* to the right service
+    return DIRECT[service] + path;
+}
 
 function log(id, msg, append = false) {
     const el = document.getElementById(id);
@@ -214,7 +242,7 @@ async function comprarBoleta() {
     log('outputCompra', '⏳ Enviando orden...');
     const start = performance.now();
     try {
-        const res = await fetch(`${BASE}:${PORTS.order}/api/orders`, {
+        const res = await fetch(svcUrl('order', '/api/orders'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ productId: parseInt(productId), quantity: 1, sede })
@@ -229,7 +257,7 @@ async function comprarBoleta() {
             document.getElementById('timerCompra').textContent = `Pago falló → Stock devuelto via ${data.protocol || 'gRPC'} | ${elapsed}ms`;
         }
     } catch (e) {
-        log('outputCompra', `❌ Error de conexión: ${e.message}\n\n¿Está Order.Api corriendo en puerto ${PORTS.order}?`);
+        log('outputCompra', `❌ Error de conexión: ${e.message}\n\n¿Está Order.Api corriendo en puerto 5027?\nSi usas el panel desde file://, ábrelo desde http://localhost:8080`);
     }
 }
 
@@ -237,7 +265,7 @@ async function buscarSemantico() {
     const q = document.getElementById('txtSearch').value;
     log('outputSearch', '⏳ Buscando con IA...');
     try {
-        const res = await fetch(`${BASE}:${PORTS.search}/api/search/semantic?q=${encodeURIComponent(q)}`);
+        const res = await fetch(svcUrl('search', `/api/search/semantic?q=${encodeURIComponent(q)}`));
         const data = await res.json();
         let output = `🧠 Búsqueda semántica: "${q}"\n🔍 Motor: ${data.engine}\n📊 Resultados: ${data.count}\n\n`;
         data.results.forEach((r, i) => {
@@ -253,7 +281,7 @@ async function testRedis() {
     log('outputRedis', '⏳ Primera llamada (cache miss)...');
     try {
         const start1 = performance.now();
-        const res1 = await fetch(`${BASE}:${PORTS.product}/api/products/1`);
+        const res1 = await fetch(svcUrl('product', '/api/products/1'));
         const data1 = await res1.json();
         const t1 = (performance.now() - start1).toFixed(0);
 
@@ -262,7 +290,7 @@ async function testRedis() {
         await new Promise(r => setTimeout(r, 500));
 
         const start2 = performance.now();
-        const res2 = await fetch(`${BASE}:${PORTS.product}/api/products/1`);
+        const res2 = await fetch(svcUrl('product', '/api/products/1'));
         const data2 = await res2.json();
         const t2 = (performance.now() - start2).toFixed(0);
 
@@ -277,7 +305,7 @@ async function testRedis() {
 async function testCorrelation() {
     log('outputCorrelation', '⏳ Ejecutando compra para capturar Correlation ID...');
     try {
-        const res = await fetch(`${BASE}:${PORTS.order}/api/orders`, {
+        const res = await fetch(svcUrl('order', '/api/orders'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ productId: 1, quantity: 1, sede: 'Medellin' })
@@ -347,7 +375,7 @@ resource "aws_eks_node_group" "workers" {
 async function seedSearch() {
     log('outputSetup', '⏳ Indexando eventos en Elasticsearch + Qdrant...');
     try {
-        const res = await fetch(`${BASE}:${PORTS.search}/api/search/seed`, { method: 'POST' });
+        const res = await fetch(svcUrl('search', '/api/search/seed'), { method: 'POST' });
         const data = await res.json();
         log('outputSetup', `✅ ${data.message}\n\n10 eventos del festival indexados en ambos motores.`);
     } catch (e) {
@@ -358,20 +386,20 @@ async function seedSearch() {
 async function checkHealth() {
     log('outputSetup', '⏳ Verificando salud de servicios...');
     const services = [
-        { name: 'Inventory', port: PORTS.inventory },
-        { name: 'Order', port: PORTS.order },
-        { name: 'Product', port: PORTS.product },
-        { name: 'Price', port: PORTS.price },
-        { name: 'Search', port: PORTS.search },
-        { name: 'Notification', port: PORTS.notification }
+        { name: 'Inventory', svc: 'inventory', path: '/api/inventory/1' },
+        { name: 'Order', svc: 'order', path: '/health' },
+        { name: 'Product', svc: 'product', path: '/api/products/1' },
+        { name: 'Price', svc: 'price', path: '/api/prices/1' },
+        { name: 'Search', svc: 'search', path: '/health' },
+        { name: 'Notification', svc: 'notification', path: '/' }
     ];
     let output = '';
     for (const svc of services) {
         try {
-            const res = await fetch(`${BASE}:${svc.port}/health`, { signal: AbortSignal.timeout(3000) });
-            output += `✅ ${svc.name} (${svc.port}) — ${res.status === 200 ? 'Healthy' : res.status}\n`;
+            const res = await fetch(svcUrl(svc.svc, svc.path), { signal: AbortSignal.timeout(3000) });
+            output += `✅ ${svc.name} — ${res.status === 200 ? 'Healthy' : res.status}\n`;
         } catch (e) {
-            output += `❌ ${svc.name} (${svc.port}) — No responde\n`;
+            output += `❌ ${svc.name} — No responde\n`;
         }
     }
     log('outputSetup', output);
