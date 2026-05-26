@@ -1,0 +1,6 @@
+@Itm.Price.Api_HostAddress = http://localhost:5294
+
+GET {{Itm.Price.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

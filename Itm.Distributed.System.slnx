@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="Itm.Gateway.Api/Itm.Gateway.Api.csproj" Id="0a5a8998-74eb-4d39-8756-91899e8e4d8f" />
+  <Project Path="Itm.Inventory.Api/Itm.Inventory.Api.csproj" />
+  <Project Path="Itm.Price.Api/Itm.Price.Api.csproj" Id="1619a95b-fae6-401e-917a-b8b843d9ff5d" />
+  <Project Path="Itm.Product.Api/Itm.Product.Api.csproj" />
+  <Project Path="Itm.Shared.Events/Itm.Shared.Events.csproj" Id="d7eca492-b078-46b0-a366-ff4c37295a8e" />
+  <Project Path="Itm.Store.Mobile/Itm.Store.Mobile.csproj" Id="8c3993a2-88d6-40fd-8fa2-defb64f09875" />
+  <Project Path="Notification.Api/Itm.Notification.Api.csproj" Id="8670398f-2f98-4083-95b2-cbc81ff14584" />
+  <Project Path="Order.Api/Order.Api.csproj" />
+</Solution>

@@ -1,0 +1,157 @@
+version: '3.8'
+
+networks:
+  itm-network:
+    driver: bridge
+
+services:
+  # ============================================================
+  # INFRAESTRUCTURA
+  # ============================================================
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: itm-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - itm-network
+
+  redis:
+    image: redis:alpine
+    container_name: itm-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - itm-network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: itm-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+    ports:
+      - "9200:9200"
+    networks:
+      - itm-network
+
+  qdrant:
+    image: qdrant/qdrant:v1.9.0
+    container_name: itm-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    networks:
+      - itm-network
+
+  # ============================================================
+  # MICROSERVICIOS
+  # ============================================================
+
+  inventory-api:
+    image: itm-inventory-api
+    build:
+      context: .
+      dockerfile: Itm.Inventory.Api/Dockerfile
+    container_name: itm-inventory-api
+    ports:
+      - "5002:8080"
+      - "5003:8081"  # Puerto gRPC
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080;http://+:8081
+      - Kestrel__Endpoints__Grpc__Url=http://+:8081
+      - Kestrel__Endpoints__Grpc__Protocols=Http2
+    networks:
+      - itm-network
+
+  order-api:
+    image: itm-order-api
+    build:
+      context: .
+      dockerfile: Order.Api/Dockerfile
+    container_name: itm-order-api
+    ports:
+      - "5004:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - InventoryGrpcUrl=http://inventory-api:8081
+      - RabbitMq__Host=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      - rabbitmq
+      - inventory-api
+    networks:
+      - itm-network
+
+  product-api:
+    image: itm-product-api
+    build:
+      context: .
+      dockerfile: Itm.Product.Api/Dockerfile
+    container_name: itm-product-api
+    ports:
+      - "5005:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Redis__Configuration=redis:6379
+    depends_on:
+      - redis
+      - inventory-api
+    networks:
+      - itm-network
+
+  notification-api:
+    image: itm-notification-api
+    build:
+      context: .
+      dockerfile: Notification.Api/Dockerfile
+    container_name: itm-notification-api
+    ports:
+      - "5006:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=amqp://guest:guest@rabbitmq:5672/
+    depends_on:
+      - rabbitmq
+    networks:
+      - itm-network
+
+  search-api:
+    image: itm-search-api
+    build:
+      context: .
+      dockerfile: Search.Api/Dockerfile
+    container_name: itm-search-api
+    ports:
+      - "5100:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Elasticsearch__Url=http://elasticsearch:9200
+      - Qdrant__Url=http://qdrant:6333
+    depends_on:
+      - elasticsearch
+      - qdrant
+    networks:
+      - itm-network
+
+  gateway-api:
+    image: itm-gateway-api
+    build:
+      context: .
+      dockerfile: Itm.Gateway.Api/Dockerfile
+    container_name: itm-gateway-api
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - inventory-api
+      - order-api
+      - product-api
+      - notification-api
+      - search-api
+    networks:
+      - itm-network

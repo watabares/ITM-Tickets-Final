@@ -1,0 +1,29 @@
+## .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.csproj.user
+
+## IDE
+.idea/
+.vscode/
+
+## OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## Build
+publish/
+out/
+
+## Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
+
+## Docker
+.env

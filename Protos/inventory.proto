@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+option csharp_namespace = "Itm.Inventory.Grpc";
+
+package inventory;
+
+// Servicio gRPC para validación binaria de inventario
+service InventoryGrpc {
+  // Consulta stock de un producto
+  rpc GetStock (GetStockRequest) returns (GetStockReply);
+  // Reserva stock (reduce) - usado por Order.Api via gRPC
+  rpc ReduceStock (ReduceStockRequest) returns (ReduceStockReply);
+  // Libera stock (compensación SAGA)
+  rpc ReleaseStock (ReduceStockRequest) returns (ReduceStockReply);
+}
+
+message GetStockRequest {
+  int32 product_id = 1;
+}
+
+message GetStockReply {
+  int32 product_id = 1;
+  int32 stock = 2;
+  string sku = 3;
+  bool found = 4;
+}
+
+message ReduceStockRequest {
+  int32 product_id = 1;
+  int32 quantity = 2;
+}
+
+message ReduceStockReply {
+  bool success = 1;
+  string message = 2;
+  int32 new_stock = 3;
+}
