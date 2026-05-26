@@ -26,8 +26,10 @@ spec:
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: "Production"
-        - name: ASPNETCORE_URLS
-          value: "http://+:8080;http://+:8081"
+        - name: Kestrel__Endpoints__Http__Url
+          value: "http://+:8080"
+        - name: Kestrel__Endpoints__Http__Protocols
+          value: "Http1AndHttp2"
         - name: Kestrel__Endpoints__Grpc__Url
           value: "http://+:8081"
         - name: Kestrel__Endpoints__Grpc__Protocols
