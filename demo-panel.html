@@ -216,8 +216,32 @@
     </div>
 </div>
 
+    <!-- Row 5: Código Fuente -->
+    <div class="row g-3 mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-code me-2"></i>6. Código Fuente (explicación)</div>
+                <div class="card-body">
+                    <div class="d-flex gap-2 flex-wrap mb-3">
+                        <button class="btn btn-outline-success btn-sm" onclick="showCode('saga')"><i class="fas fa-rotate me-1"></i>SAGA + gRPC (Order.Api)</button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="showCode('grpc_server')"><i class="fas fa-server me-1"></i>gRPC Server (Inventory)</button>
+                        <button class="btn btn-outline-warning btn-sm" onclick="showCode('proto')"><i class="fas fa-file-contract me-1"></i>Contrato .proto</button>
+                        <button class="btn btn-outline-info btn-sm" onclick="showCode('redis')"><i class="fas fa-database me-1"></i>Redis Cache-Aside</button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="showCode('signalr')"><i class="fas fa-bell me-1"></i>SignalR Consumer</button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="showCode('gateway')"><i class="fas fa-shield-alt me-1"></i>Gateway (Rate Limit)</button>
+                        <button class="btn btn-outline-dark btn-sm" onclick="showCode('search')"><i class="fas fa-brain me-1"></i>Búsqueda Semántica</button>
+                        <button class="btn btn-outline-success btn-sm" onclick="showCode('docker')"><i class="fab fa-docker me-1"></i>Dockerfile</button>
+                        <button class="btn btn-outline-info btn-sm" onclick="showCode('k8s')"><i class="fas fa-dharmachakra me-1"></i>K8s + HPA</button>
+                        <button class="btn btn-outline-warning btn-sm" onclick="showCode('actions')"><i class="fab fa-github me-1"></i>GitHub Actions</button>
+                    </div>
+                    <div class="output-box" id="outputCode" style="max-height:450px; font-size:12px;">Selecciona un archivo para ver el código con explicación...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-const BASE = '';  // Relative paths through nginx proxy (or set to http://localhost for direct)
 const PORTS = { order: '', inventory: '', product: '', price: '', search: '', gateway: '', notification: '' };
 const DIRECT = { order: 'http://localhost:5027', inventory: 'http://localhost:5293', product: 'http://localhost:5298', price: 'http://localhost:5012', search: 'http://localhost:5100', gateway: 'http://localhost:5110', notification: 'http://localhost:5089' };
 
@@ -409,6 +433,424 @@ async function checkHealth() {
 window.addEventListener('load', () => {
     setTimeout(checkHealth, 1000);
 });
+
+function showCode(section) {
+    const codes = {
+saga: `📁 Order.Api/Program.cs — SAGA Orquestada + gRPC Client
+═══════════════════════════════════════════════════════════════
+
+// 1. Registramos el cliente gRPC hacia Inventory.Api
+builder.Services.AddGrpcClient<InventoryGrpc.InventoryGrpcClient>(options =>
+{
+    options.Address = new Uri("http://localhost:5294"); // Puerto Http2
+});
+
+// 2. Endpoint de compra con SAGA
+app.MapPost("/api/orders", async (CreateOrderDto order,
+    InventoryGrpc.InventoryGrpcClient grpcClient,  // ← Cliente gRPC inyectado
+    IPublishEndpoint publisher) =>                  // ← MassTransit para RabbitMQ
+{
+    // PASO 1: Reservar stock via gRPC (binario, <10ms)
+    var reduceReply = await grpcClient.ReduceStockAsync(new ReduceStockRequest
+    {
+        ProductId = order.ProductId,
+        Quantity = order.Quantity
+    });
+
+    if (!reduceReply.Success)
+        return Results.BadRequest(reduceReply.Message);
+
+    try
+    {
+        // PASO 2: Procesar pago (simulado)
+        bool paymentSuccess = new Random().Next(0, 10) > 2;
+        if (!paymentSuccess)
+            throw new Exception("Fondos Insuficientes");
+
+        // PASO 3: Publicar evento a RabbitMQ (fire-and-forget)
+        await publisher.Publish(new OrderCreatedEvent(...));
+        return Results.Ok(new { Status = "Boleta reservada", Protocol = "gRPC" });
+    }
+    catch (Exception ex)
+    {
+        // COMPENSACIÓN SAGA: Devolver stock via gRPC
+        await grpcClient.ReleaseStockAsync(new ReduceStockRequest { ... });
+        return Results.Problem("Pago falló. Stock devuelto.");
+    }
+});
+
+💡 EXPLICACIÓN:
+• gRPC es 5-10x más rápido que REST (binario vs JSON)
+• Si el pago falla, la SAGA compensa automáticamente
+• El evento se publica a RabbitMQ para notificar asincrónicamente`,
+
+grpc_server: `📁 Itm.Inventory.Api/Services/InventoryGrpcService.cs — Servidor gRPC
+═══════════════════════════════════════════════════════════════════════
+
+public class InventoryGrpcService : InventoryGrpc.InventoryGrpcBase
+{
+    // Base de datos en memoria (en producción sería PostgreSQL)
+    private static readonly List<InventoryItem> _inventoryDb = new()
+    {
+        new(1, 50, "BOLETA-MEDELLIN-VIP"),
+        new(2, 100, "BOLETA-MEDELLIN-GENERAL"),
+        new(3, 50, "BOLETA-MADRID-VIP"),
+        new(4, 100, "BOLETA-MADRID-GENERAL"),
+    };
+
+    // Método gRPC: Reservar stock (llamado por Order.Api)
+    public override Task<ReduceStockReply> ReduceStock(
+        ReduceStockRequest request, ServerCallContext context)
+    {
+        var item = _inventoryDb.FirstOrDefault(i => i.ProductId == request.ProductId);
+
+        if (item.Stock < request.Quantity)
+            return Task.FromResult(new ReduceStockReply { Success = false });
+
+        // Reducir stock atómicamente
+        _inventoryDb[index] = item with { Stock = item.Stock - request.Quantity };
+
+        return Task.FromResult(new ReduceStockReply
+        {
+            Success = true,
+            NewStock = _inventoryDb[index].Stock
+        });
+    }
+
+    // Método gRPC: Compensación SAGA (devolver stock)
+    public override Task<ReduceStockReply> ReleaseStock(...) { ... }
+}
+
+💡 EXPLICACIÓN:
+• Hereda de InventoryGrpc.InventoryGrpcBase (generado del .proto)
+• Cada método recibe un Request tipado y retorna un Reply tipado
+• La comunicación es binaria (Protocol Buffers), no JSON`,
+
+proto: `📁 Protos/inventory.proto — Contrato gRPC
+══════════════════════════════════════════════
+
+syntax = "proto3";
+option csharp_namespace = "Itm.Inventory.Grpc";
+
+// Definición del servicio (como una interfaz)
+service InventoryGrpc {
+  rpc GetStock (GetStockRequest) returns (GetStockReply);
+  rpc ReduceStock (ReduceStockRequest) returns (ReduceStockReply);
+  rpc ReleaseStock (ReduceStockRequest) returns (ReduceStockReply);
+}
+
+// Mensajes (como DTOs pero binarios)
+message ReduceStockRequest {
+  int32 product_id = 1;    // Campo 1: ID del producto
+  int32 quantity = 2;      // Campo 2: Cantidad a reservar
+}
+
+message ReduceStockReply {
+  bool success = 1;        // ¿Se pudo reservar?
+  string message = 2;      // Mensaje descriptivo
+  int32 new_stock = 3;     // Stock restante
+}
+
+💡 EXPLICACIÓN:
+• Este archivo es el CONTRATO entre Order.Api (cliente) e Inventory.Api (servidor)
+• Se compila a código C# automáticamente (generación de código)
+• Protocol Buffers serializa en binario: más rápido y más pequeño que JSON
+• Los números (= 1, = 2) son identificadores de campo, no valores`,
+
+redis: `📁 Itm.Product.Api/Program.cs — Patrón Cache-Aside con Redis
+══════════════════════════════════════════════════════════════════
+
+// Registro de Redis como caché distribuida
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost:6379";
+    options.InstanceName = "ItmTickets_";
+});
+
+// Endpoint con Cache-Aside
+app.MapGet("/api/products/{id}", async (int id,
+    IDistributedCache cache, IHttpClientFactory factory) =>
+{
+    string cacheKey = $"Product_summary_{id}";
+
+    // 1. ¿Está en Redis? (Cache Hit)
+    var cachedData = await cache.GetStringAsync(cacheKey);
+    if (!string.IsNullOrEmpty(cachedData))
+    {
+        logger.LogInformation("✅ Cache HIT: datos desde Redis");
+        return Results.Ok(JsonSerializer.Deserialize<object>(cachedData));
+    }
+
+    // 2. No está → ir a Price.Api (Cache Miss)
+    logger.LogWarning("❌ Cache MISS: consultando Price.Api");
+    var priceResponse = await client.GetFromJsonAsync<PriceResponse>(...);
+
+    // 3. Guardar en Redis con TTL de 60 segundos
+    await cache.SetStringAsync(cacheKey,
+        JsonSerializer.Serialize(finalProduct),
+        new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
+        });
+
+    return Results.Ok(finalProduct);
+});
+
+💡 EXPLICACIÓN:
+• Primera llamada: va a Price.Api (lento) y guarda en Redis
+• Siguientes llamadas (60s): vienen de Redis (rápido, no toca BD)
+• Con 50,000 usuarios, el 90% son cache hits → BD no se satura
+• Redis es distribuido: todos los pods comparten el mismo cache`,
+
+signalr: `📁 Notification.Api/Consumers/OrderCreatedConsumer.cs — Consumer + SignalR
+═══════════════════════════════════════════════════════════════════════════════
+
+// Este consumer se "despierta" cuando llega un evento de RabbitMQ
+public class OrderCreatedConsumer : IConsumer<OrderCreatedEvent>
+{
+    private readonly IHubContext<NotificationHub> _hubContext;
+
+    public async Task Consume(ConsumeContext<OrderCreatedEvent> context)
+    {
+        // 1. Procesar el evento (simular generación de PDF, etc.)
+        await Task.Delay(3000);
+
+        // 2. Enviar notificación push via SignalR a TODOS los clientes conectados
+        var message = $"¡Tu boleta para el producto {context.Message.ProductId} confirmada!";
+        await _hubContext.Clients.All.SendAsync("TicketReady", message);
+    }
+}
+
+// Hub de SignalR (conexión WebSocket persistente)
+public class NotificationHub : Hub
+{
+    public override Task OnConnectedAsync()
+    {
+        Console.WriteLine($"[SignalR] Cliente conectado: {Context.ConnectionId}");
+        return base.OnConnectedAsync();
+    }
+}
+
+💡 EXPLICACIÓN:
+• RabbitMQ retiene el mensaje si este servicio está caído (resiliencia)
+• Cuando se levanta, consume los mensajes pendientes
+• SignalR mantiene WebSocket abierto con la app MAUI
+• "TicketReady" es el evento que la app escucha para mostrar la alerta`,
+
+gateway: `📁 Itm.Gateway.Api/Program.cs — YARP + JWT + Rate Limiting
+═══════════════════════════════════════════════════════════════════
+
+// 1. YARP Reverse Proxy (enruta peticiones a microservicios)
+builder.Services.AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
+// 2. JWT Authentication (valida tokens antes de pasar al backend)
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = "ItmIdentityServer",
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(secretKey)
+        };
+    });
+
+// 3. Rate Limiting (protección contra fuerza bruta)
+builder.Services.AddRateLimiter(options =>
+{
+    // Global: 100 requests/minuto por IP
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
+        context => RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString(),
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+
+    // Compras: máximo 5/minuto por IP (anti-acaparamiento)
+    options.AddSlidingWindowLimiter("purchase", opt => {
+        opt.PermitLimit = 5;
+        opt.Window = TimeSpan.FromMinutes(1);
+    });
+});
+
+💡 EXPLICACIÓN:
+• YARP es el punto de entrada único — los clientes solo conocen 1 URL
+• JWT se valida ANTES de llegar a los microservicios (seguridad perimetral)
+• Rate Limiting evita que un bot compre todas las boletas
+• 100 req/min global + 5 compras/min = control de multitudes`,
+
+search: `📁 Search.Api/Services/EventSearchService.cs — Elasticsearch + Qdrant
+═══════════════════════════════════════════════════════════════════════════
+
+// Búsqueda por TEXTO (Elasticsearch) — palabras exactas/fuzzy
+public async Task<List<SearchResult>> SearchByTextAsync(string query)
+{
+    var response = await _esClient.SearchAsync<EventDocument>(s => s
+        .Index("events")
+        .Query(q => q.MultiMatch(mm => mm
+            .Query(query)
+            .Fields(new[] { "name^3", "description^2", "tags" })
+            .Fuzziness(new Fuzziness("AUTO"))  // Tolera errores de tipeo
+        ))
+    );
+    return response.Documents.Select(...).ToList();
+}
+
+// Búsqueda SEMÁNTICA (Qdrant) — entiende intención/vibe
+public async Task<List<SearchResult>> SearchByVibeAsync(string query)
+{
+    // 1. Convertir texto a vector (embedding)
+    var queryVector = GenerateSimpleEmbedding(query);
+
+    // 2. Buscar vectores más cercanos por similitud coseno
+    var searchResult = await _qdrantClient.SearchAsync(
+        "events_vectors", queryVector, limit: 5);
+
+    return searchResult.Select(r => new SearchResult(...)).ToList();
+}
+
+// Embedding simplificado (en producción: OpenAI/sentence-transformers)
+private float[] GenerateSimpleEmbedding(string text)
+{
+    // Mapea conceptos a dimensiones del vector
+    var concepts = new Dictionary<int, string[]> {
+        [5] = new[] { "familia", "niños", "infantil", "juegos" },
+        [6] = new[] { "fiesta", "noche", "electrónica" },
+        ...
+    };
+    // Activa dimensiones según las palabras del texto
+}
+
+💡 EXPLICACIÓN:
+• Elasticsearch: busca "concierto madrid" → encuentra documentos con esas palabras
+• Qdrant: busca "algo divertido para familia" → encuentra "Zona Familiar"
+  (sin compartir palabras, entiende el SIGNIFICADO)
+• Los vectores representan conceptos, no palabras literales
+• En producción se usaría OpenAI Embeddings (1536 dimensiones)`,
+
+docker: `📁 Order.Api/Dockerfile — Multi-stage Build
+═══════════════════════════════════════════════
+
+# Etapa 1: BUILD (imagen pesada con SDK ~700MB)
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["Order.Api/Order.Api.csproj", "Order.Api/"]
+COPY ["Itm.Shared.Events/Itm.Shared.Events.csproj", "Itm.Shared.Events/"]
+RUN dotnet restore "Order.Api/Order.Api.csproj"
+COPY . .
+RUN dotnet publish "Order.Api.csproj" -c Release -o /app/publish
+
+# Etapa 2: RUNTIME (imagen liviana solo con runtime ~100MB)
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Order.Api.dll"]
+
+💡 EXPLICACIÓN:
+• Multi-stage: la imagen final NO incluye el SDK (solo el runtime)
+• Resultado: ~100MB en vez de ~700MB
+• Menos superficie de ataque (menos herramientas en el contenedor)
+• Deploys más rápidos (menos bytes que transferir)
+• Cada servicio tiene su propio Dockerfile independiente`,
+
+k8s: `📁 k8s/order-deployment.yaml — Deployment + Service + HPA
+═══════════════════════════════════════════════════════════════
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-api
+  namespace: itm-tickets
+spec:
+  replicas: 2                    # ← Mínimo 2 réplicas siempre
+  template:
+    spec:
+      containers:
+      - name: order-api
+        image: watabares/itm-order-api:latest  # ← Desde Docker Hub
+        resources:
+          requests: { cpu: "100m", memory: "128Mi" }
+          limits:   { cpu: "500m", memory: "512Mi" }
+        livenessProbe:           # ← K8s reinicia si no responde
+          httpGet: { path: /health, port: 8080 }
+        readinessProbe:          # ← No recibe tráfico hasta estar listo
+          httpGet: { path: /health, port: 8080 }
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: order-hpa
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: order-api
+  minReplicas: 2               # ← Nunca menos de 2
+  maxReplicas: 15              # ← Hasta 15 bajo carga
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        averageUtilization: 60  # ← Escala si CPU > 60%
+
+💡 EXPLICACIÓN:
+• replicas: 2 = siempre hay 2 pods (si uno muere, el otro sigue)
+• HPA: si CPU > 60%, crea más pods automáticamente (hasta 15)
+• livenessProbe: si /health no responde → K8s mata y recrea el pod
+• readinessProbe: no envía tráfico hasta que el pod esté listo
+• Así soportamos 50,000 usuarios: escala horizontal automática`,
+
+actions: `📁 .github/workflows/deploy.yml — CI/CD Pipeline
+══════════════════════════════════════════════════════
+
+name: Build & Push to Docker Hub
+on:
+  push:
+    branches: [ main ]          # ← Se dispara al hacer push a main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:                 # ← Compila los 6 servicios en paralelo
+          - name: itm-order-api
+            dockerfile: Order.Api/Dockerfile
+          - name: itm-inventory-api
+          - name: itm-gateway-api
+          - name: itm-notification-api
+          - name: itm-product-api
+          - name: itm-search-api
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+
+      - run: dotnet restore Itm.Distributed.System.sln
+      - run: dotnet build --configuration Release
+      - run: dotnet test --configuration Release
+
+      - uses: docker/login-action@v3        # ← Login a Docker Hub
+        with:
+          username: \${{ secrets.DOCKER_USERNAME }}
+          password: \${{ secrets.DOCKER_PASSWORD }}
+
+      - uses: docker/build-push-action@v5   # ← Build + Push imagen
+        with:
+          push: true
+          tags: watabares/\${{ matrix.service.name }}:latest
+
+💡 EXPLICACIÓN:
+• Al hacer git push → GitHub compila, testea y sube imágenes automáticamente
+• Los secretos (DOCKER_USERNAME/PASSWORD) están en GitHub Settings
+• Matrix strategy: los 6 servicios se construyen en paralelo
+• Las imágenes quedan en Docker Hub listas para que K8s las descargue`
+    };
+    log('outputCode', codes[section] || 'Sección no encontrada');
+}
 </script>
 </body>
 </html>
