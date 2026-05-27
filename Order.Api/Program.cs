@@ -29,7 +29,7 @@ builder.Services.AddMassTransit(x =>
 // Cliente gRPC hacia Inventory.Api (comunicación binaria - Nivel 5)
 builder.Services.AddGrpcClient<InventoryGrpc.InventoryGrpcClient>(options =>
 {
-    options.Address = new Uri("http://localhost:5294"); // Puerto gRPC (Http2) de Inventory.Api
+    options.Address = new Uri(builder.Configuration["InventoryGrpcUrl"] ?? "http://localhost:5294");
 });
 
 // Cliente HTTP legacy (fallback)
@@ -183,6 +183,7 @@ internal sealed class CloudAmqpHealthCheck : Microsoft.Extensions.Diagnostics.He
         }
     }
 }
+
 
 
 

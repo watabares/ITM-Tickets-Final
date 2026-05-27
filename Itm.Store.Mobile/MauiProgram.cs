@@ -1,4 +1,4 @@
-﻿using Itm.Store.Mobile.Services;
+using Itm.Store.Mobile.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -30,7 +30,11 @@ namespace Itm.Store.Mobile
                     // El emulador 10.0.2.2 es la IP que usa Android para hablar con el localhost del PC.
                     // En dispositivo físico, cambiar por la IP local del PC en la red Wi‑Fi.
                     // El Gateway corre por defecto en http://localhost:5110, así que desde el emulador usamos el mismo puerto.
+                    #if WINDOWS
+                    client.BaseAddress = new Uri("http://localhost:5110/");
+#else
                     client.BaseAddress = new Uri("http://10.0.2.2:5110/");
+#endif
                 })
                 .AddHttpMessageHandler<AuthHandler>();
 
@@ -41,3 +45,4 @@ namespace Itm.Store.Mobile
         }
     }
 }
+

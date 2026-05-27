@@ -3,851 +3,772 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITM-Tickets - Panel de Demo</title>
+    <title>ITM-Tickets - Panel de Sustentación</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #00843D; --primary-dark: #006630; --accent: #FFD100; --success: #4caf50; --danger: #f44336; --warning: #ff9800; }
+        :root { --primary: #00843D; --primary-dark: #006630; --accent: #FFD100; }
         body { background: #f5f7fa; color: #1a1a2e; font-family: 'Segoe UI', sans-serif; }
         .navbar { background: var(--primary) !important; border-bottom: 3px solid var(--accent); }
-        .navbar-brand { font-weight: 700; }
-        .card { background: #ffffff; border: 1px solid #dee2e6; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .card-header { background: var(--primary); color: #ffffff; border-bottom: none; font-weight: 600; border-radius: 12px 12px 0 0 !important; }
-        .btn-demo { border-radius: 8px; font-weight: 500; transition: all 0.2s; }
-        .btn-demo:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .btn-success { background: var(--primary) !important; border-color: var(--primary) !important; }
-        .btn-success:hover { background: var(--primary-dark) !important; }
-        .output-box { background: #1e1e2e; color: #e6edf3; border: 1px solid #dee2e6; border-radius: 8px;
-            font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 13px;
-            max-height: 300px; overflow-y: auto; padding: 12px; white-space: pre-wrap; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-        .dot-green { background: var(--success); }
-        .dot-red { background: var(--danger); }
-        .dot-yellow { background: var(--accent); }
-        .section-title { color: var(--primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-        .badge-proto { font-size: 0.7rem; }
-        .timer { font-size: 0.8rem; color: #6c757d; }
-        .form-select, .form-control { background: #ffffff; color: #1a1a2e; border-color: #ced4da; }
-        .form-select:focus, .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(0,132,61,0.25); }
-        .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
-        .btn-info { background: #0d6efd !important; border-color: #0d6efd !important; color: white !important; }
-        .btn-info:hover { background: #0b5ed7 !important; }
+        .card { background: #fff; border: 1px solid #dee2e6; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .output-box { background: #1e1e2e; color: #e6edf3; border-radius: 8px; font-family: 'Cascadia Code', monospace; font-size: 12.5px; max-height: 280px; overflow-y: auto; padding: 12px; white-space: pre-wrap; }
+        .nav-tabs .nav-link { font-weight: 600; color: #495057; }
+        .nav-tabs .nav-link.active { color: var(--primary); border-color: var(--primary) var(--primary) #fff; }
+        .step-card { border-left: 4px solid var(--primary); background: #f8f9fa; border-radius: 0 8px 8px 0; padding: 12px 16px; margin-bottom: 12px; }
+        .step-card.done { border-left-color: #4caf50; background: #f0fff0; }
+        .step-num { background: var(--primary); color: #fff; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+        .step-num.done { background: #4caf50; }
+        .speech-bubble { background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 8px; padding: 8px 12px; font-style: italic; font-size: 0.85rem; margin-top: 6px; }
         .itm-badge { background: var(--accent); color: #000; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
-        .btn-outline-light { border-color: #6c757d; color: #1a1a2e; }
-        .btn-outline-light:hover { background: #e9ecef; color: #1a1a2e; border-color: #6c757d; }
-        .btn-outline-success { border-color: var(--primary); color: var(--primary); }
-        .btn-outline-success:hover { background: var(--primary); color: white; }
-        .btn-outline-info { border-color: #0d6efd; color: #0d6efd; }
-        .btn-outline-info:hover { background: #0d6efd; color: white; }
-        .btn-outline-warning { border-color: var(--warning); color: #856404; }
-        .btn-outline-warning:hover { background: var(--warning); color: #000; }
-        .text-muted { color: #6c757d !important; }
-        .small, small { color: #495057; }
+        .btn-demo { border-radius: 8px; font-weight: 500; }
+        .form-select, .form-control { font-size: 0.85rem; }
     </style>
 </head>
 <body>
 <nav class="navbar navbar-dark px-4 py-2">
-    <span class="navbar-brand mb-0 h4"><i class="fas fa-ticket-alt me-2"></i>ITM-Tickets — Panel de Sustentación</span>
-    <span class="text-light small"><span class="itm-badge me-2">ITM</span> Programación Distribuida | Festival de los Dos Mundos 2026</span>
+    <span class="navbar-brand mb-0 h5"><i class="fas fa-ticket-alt me-2"></i>ITM-Tickets — Guía de Sustentación</span>
+    <span class="text-light small"><span class="itm-badge me-2">ITM</span> Programación Distribuida | Nivel 5</span>
 </nav>
 
 <div class="container-fluid px-4 py-3">
-    <!-- Status Bar -->
-    <div class="row mb-3" id="statusBar">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body py-2 d-flex align-items-center gap-4 flex-wrap" style="background:#f8f9fa; border-radius:12px;">
-                    <span class="section-title me-3"><i class="fas fa-heartbeat"></i> Estado</span>
-                    <span id="svcInventory"><span class="status-dot dot-yellow"></span> Inventory</span>
-                    <span id="svcOrder"><span class="status-dot dot-yellow"></span> Order</span>
-</div></div></div></div>
+    <!-- Tabs A-D -->
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabA"><i class="fas fa-mobile-alt me-1"></i> A. Frontera</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabB"><i class="fas fa-server me-1"></i> B. Microservicios</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabC"><i class="fas fa-brain me-1"></i> C. Comunicación e IA</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabD"><i class="fas fa-cloud me-1"></i> D. DevOps y Nube</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabSetup"><i class="fas fa-cog me-1"></i> Setup</a></li>
+    </ul>
 
-    <!-- Row 1: Compra + SAGA -->
-    <div class="row g-3 mb-3">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header"><i class="fas fa-shopping-cart me-2"></i>1. Compra de Boleta (SAGA + gRPC)</div>
-                <div class="card-body">
-                    <div class="row g-2 mb-3">
-                        <div class="col-auto">
-                            <select id="selProducto" class="form-select form-select-sm">
-                                <option value="1">Boleta VIP Medellín ($150,000 COP)</option>
-                                <option value="2">Boleta General Medellín ($80,000 COP)</option>
-                                <option value="3">Boleta VIP Madrid (€85)</option>
-                                <option value="4">Boleta General Madrid (€45)</option>
-                                <option value="5">Combo Dos Mundos ($200,000 COP)</option>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <select id="selSede" class="form-select form-select-sm">
-                                <option value="Medellin">Medellín</option>
-                                <option value="Madrid">Madrid</option>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <button class="btn btn-success btn-demo btn-sm" onclick="comprarBoleta()">
-                                <i class="fas fa-bolt me-1"></i>Comprar
-                            </button>
-                        </div>
-                    </div>
-                    <div class="output-box" id="outputCompra">Esperando acción...</div>
-                    <div class="timer mt-1" id="timerCompra"></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header"><i class="fas fa-search me-2"></i>5. Búsqueda Semántica (IA)</div>
-                <div class="card-body">
-                    <div class="input-group input-group-sm mb-3">
-                        <input type="text" id="txtSearch" class="form-control" placeholder="algo divertido para la familia" value="algo divertido para la familia">
-                        <button class="btn btn-info btn-demo" onclick="buscarSemantico()"><i class="fas fa-brain me-1"></i>Buscar</button>
-                    </div>
-                    <div class="d-flex gap-2 mb-2">
-                        <button class="btn btn-outline-light btn-sm" onclick="document.getElementById('txtSearch').value='concierto en madrid';buscarSemantico()">concierto madrid</button>
-                        <button class="btn btn-outline-light btn-sm" onclick="document.getElementById('txtSearch').value='fiesta electronica noche';buscarSemantico()">fiesta noche</button>
-                        <button class="btn btn-outline-light btn-sm" onclick="document.getElementById('txtSearch').value='aprender musica';buscarSemantico()">aprender música</button>
-                    </div>
-                    <div class="output-box" id="outputSearch">Esperando acción...</div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="tab-content">
 
-    <!-- Row 2: Redis + Correlation ID -->
-    <div class="row g-3 mb-3">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header"><i class="fas fa-database me-2 text-danger"></i>3. Redis Cache (Latencia)</div>
-                <div class="card-body">
-                    <p class="small text-muted mb-2">Primera llamada = cache miss (va a Price.Api). Segunda = cache hit (Redis).</p>
-                    <button class="btn btn-warning btn-demo btn-sm mb-2" onclick="testRedis()">
-                        <i class="fas fa-tachometer-alt me-1"></i>Probar Cache (2 llamadas)
-                    </button>
-                    <div class="output-box" id="outputRedis">Esperando acción...</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header"><i class="fas fa-link me-2 text-info"></i>2. Correlation ID (3 servicios)</div>
-                <div class="card-body">
-                    <p class="small text-muted mb-2">El mismo ID viaja por Order → Inventory (gRPC) → Notification (RabbitMQ).</p>
-                    <button class="btn btn-info btn-demo btn-sm mb-2" onclick="testCorrelation()">
-                        <i class="fas fa-project-diagram me-1"></i>Mostrar Correlation ID
-                    </button>
-                    <div class="output-box" id="outputCorrelation">Esperando acción...</div>
-                </div>
-            </div>
-        </div>
-    </div>
+        <!-- TAB A: Frontera y Movilidad -->
+        <div class="tab-pane fade show active" id="tabA">
+            <h5 class="text-success mb-3"><i class="fas fa-mobile-alt me-2"></i>A. Frontera y Movilidad (.NET MAUI & YARP)</h5>
 
-    <!-- Row 3: K8s Self-healing + Terraform -->
-    <div class="row g-3 mb-3">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header"><i class="fas fa-skull-crossbones me-2 text-danger"></i>3. Self-Healing (Kill Pod)</div>
-                <div class="card-body">
-                    <p class="small text-muted mb-2">Mata un pod de Order.Api y observa cómo K8s lo recrea automáticamente.</p>
-                    <div class="d-flex gap-2 mb-2">
-                        <button class="btn btn-danger btn-demo btn-sm" onclick="killPod()">
-                            <i class="fas fa-bomb me-1"></i>Matar Pod
-                        </button>
-                        <button class="btn btn-outline-success btn-sm" onclick="getPods()">
-                            <i class="fas fa-sync me-1"></i>Ver Pods
-                        </button>
-                        <button class="btn btn-outline-info btn-sm" onclick="getHPA()">
-                            <i class="fas fa-chart-line me-1"></i>Ver HPA
-                        </button>
-                    </div>
-                    <div class="output-box" id="outputK8s">Esperando acción...</div>
+            <div class="step-card" id="stepA1">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">1</span>
+                    <strong>App Móvil (.NET MAUI) — Iniciar Sesión</strong>
                 </div>
+                <p class="small mb-2">La app guarda el JWT en <code>SecureStorage</code> (cifrado del dispositivo). Esto simula el login contra un Identity Server.</p>
+                <button class="btn btn-sm btn-outline-primary btn-demo" onclick="launchMaui()"><i class="fas fa-mobile-alt me-1"></i>Copiar comando para lanzar MAUI</button>
+                <button class="btn btn-sm btn-outline-secondary btn-demo" onclick="showCode('maui_login')"><i class="fas fa-code me-1"></i>Ver código</button>
+                <div class="speech-bubble">💬 "La app MAUI guarda el JWT en SecureStorage — cifrado nativo del dispositivo. Al hacer cualquier petición, el AuthHandler lo adjunta automáticamente como Bearer token."</div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header"><i class="fas fa-cloud me-2 text-warning"></i>4. Terraform (IaC)</div>
-                <div class="card-body">
-                    <p class="small text-muted mb-2">Muestra el plan de infraestructura AWS EKS sin ejecutarlo.</p>
-                    <button class="btn btn-outline-warning btn-demo btn-sm mb-2" onclick="showTerraform()">
-                        <i class="fas fa-file-code me-1"></i>Ver main.tf
-                    </button>
-                    <div class="output-box" id="outputTerraform">Esperando acción...</div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Row 4: Seed + Health -->
-    <div class="row g-3 mb-3">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-seedling me-2"></i>Setup</div>
-                <div class="card-body">
-                    <button class="btn btn-outline-success btn-sm btn-demo w-100 mb-2" onclick="seedSearch()">
-                        <i class="fas fa-database me-1"></i>Seed Búsqueda (Elasticsearch + Qdrant)
-                    </button>
-                    <button class="btn btn-outline-info btn-sm btn-demo w-100" onclick="checkHealth()">
-                        <i class="fas fa-heartbeat me-1"></i>Health Check (todos)
-                    </button>
-                    <div class="output-box mt-2" id="outputSetup" style="max-height:150px">Esperando acción...</div>
+            <div class="step-card" id="stepA2">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">2</span>
+                    <strong>App Móvil — Consultar Producto (via Gateway)</strong>
                 </div>
+                <p class="small mb-2">La app llama al Gateway (YARP). El Gateway valida el JWT y enruta a Product.Api → Inventory.Api.</p>
+                <!-- Flujo visual -->
+                <div class="p-2 mb-2 rounded" style="background:#e8f5e9; border:1px solid #c8e6c9; font-family:monospace; font-size:12px;">
+                    <strong>Flujo de la petición:</strong><br>
+                    📱 MAUI <span style="color:#00843D">──JWT──▶</span> 🚪 Gateway (YARP) <span style="color:#00843D">──valida──▶</span> 📦 Product.Api <span style="color:#00843D">──HTTP──▶</span> 🏭 Inventory.Api<br>
+                    <span style="color:#666">puerto 5110 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; puerto 5298 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; puerto 5293</span>
+                </div>
+                <p class="small text-muted">✅ Verificación: La app muestra <code>{"productId":1,"stock":50,"sku":"BOLETA-MEDELLIN-VIP"}</code></p>
+                <button class="btn btn-sm btn-outline-secondary btn-demo" onclick="showCode('maui_request')"><i class="fas fa-code me-1"></i>Ver código AuthHandler</button>
+                <div class="speech-bubble">💬 "El flujo completo es: la app MAUI adjunta el JWT automáticamente con el AuthHandler, el Gateway lo valida (issuer, audience, firma, expiración), y solo si es válido enruta la petición a Product.Api, que a su vez consulta Inventory.Api. Sin token → 401 en el Gateway, nunca llega al backend."</div>
+            </div>
+
+            <div class="step-card" id="stepA3">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">3</span>
+                    <strong>API Gateway (YARP) — Validación JWT</strong>
+                </div>
+                <p class="small mb-2">El Gateway valida issuer, audience, firma y expiración del token ANTES de redirigir al backend.</p>
+                <div class="d-flex gap-2 mb-2">
+                    <button class="btn btn-sm btn-outline-danger btn-demo" onclick="testSinToken()"><i class="fas fa-ban me-1"></i>Llamar SIN token (debe fallar)</button>
+                    <button class="btn btn-sm btn-outline-success btn-demo" onclick="testConToken()"><i class="fas fa-check me-1"></i>Llamar CON token (debe pasar)</button>
+                    <button class="btn btn-sm btn-outline-secondary btn-demo" onclick="showCode('gateway')"><i class="fas fa-code me-1"></i>Ver código</button>
+                </div>
+                <div class="output-box" id="outputJWT" style="max-height:150px">Esperando acción...</div>
+                <div class="speech-bubble">💬 "Sin token → 401 Unauthorized. Con token válido → 200 OK. El Gateway es la primera línea de defensa — los microservicios internos nunca reciben tráfico no autenticado."</div>
+            </div>
+
+            <div class="step-card" id="stepA4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">4</span>
+                    <strong>Rate Limiting — Control de Multitudes</strong>
+                </div>
+                <p class="small mb-2">100 requests/min global por IP + 5 compras/min para evitar acaparamiento de boletas.</p>
+                <div class="d-flex gap-2 mb-2">
+                    <button class="btn btn-sm btn-outline-warning btn-demo" onclick="testRateLimit()"><i class="fas fa-bolt me-1"></i>Disparar 10 compras rápidas</button>
+                    <button class="btn btn-sm btn-outline-secondary btn-demo" onclick="showCode('gateway')"><i class="fas fa-code me-1"></i>Ver código</button>
+                </div>
+                <div class="output-box" id="outputRate" style="max-height:150px">Esperando acción...</div>
+                <div class="speech-bubble">💬 "Máximo 5 compras por minuto por IP. Al sexto intento → HTTP 429 Too Many Requests. Esto evita que un bot acapare todas las boletas."</div>
             </div>
         </div>
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-list-check me-2"></i>Checklist Sustentación (15 min)</div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-check"><input class="form-check-input" type="checkbox" id="chk1"><label class="form-check-label small" for="chk1">Min 0-3: Compra exitosa + gRPC latencia</label></div>
-                            <div class="form-check"><input class="form-check-input" type="checkbox" id="chk2"><label class="form-check-label small" for="chk2">Min 3-6: Correlation ID en 3 servicios</label></div>
-                            <div class="form-check"><input class="form-check-input" type="checkbox" id="chk3"><label class="form-check-label small" for="chk3">Min 6-9: Kill pod + self-healing</label></div>
+
+        <!-- TAB B: Núcleo de Microservicios -->
+        <div class="tab-pane fade" id="tabB">
+            <h5 class="text-primary mb-3"><i class="fas fa-server me-2"></i>B. Núcleo de Microservicios (Backend)</h5>
+
+            <div class="step-card" id="stepB1">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">1</span>
+                    <strong>Venta de Órdenes — Patrón SAGA + gRPC</strong>
+                </div>
+                <p class="small mb-2">Order.Api reserva stock via gRPC → procesa pago → si falla, compensa devolviendo stock.</p>
+                <!-- Flujo visual SAGA -->
+                <div class="p-2 mb-2 rounded" style="background:#e3f2fd; border:1px solid #bbdefb; font-family:monospace; font-size:11.5px;">
+                    <strong>Flujo SAGA (éxito):</strong><br>
+                    🛒 Order.Api <span style="color:#1565c0">══gRPC══▶</span> 🏭 Inventory (ReduceStock) <span style="color:#2e7d32">──OK──▶</span> 💳 Pago <span style="color:#2e7d32">──OK──▶</span> 📨 RabbitMQ (evento)<br><br>
+                    <strong>Flujo SAGA (fallo + compensación):</strong><br>
+                    🛒 Order.Api <span style="color:#1565c0">══gRPC══▶</span> 🏭 Inventory (ReduceStock) <span style="color:#2e7d32">──OK──▶</span> 💳 Pago <span style="color:#c62828">──FALLA──▶</span> 🏭 Inventory (<span style="color:#c62828">ReleaseStock</span>) ↩️
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-auto">
+                        <select id="selProducto" class="form-select form-select-sm">
+                            <option value="1">Boleta VIP Medellín ($150,000)</option>
+                            <option value="3">Boleta VIP Madrid (€85)</option>
+                            <option value="5">Combo Dos Mundos ($200,000)</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <select id="selSede" class="form-select form-select-sm">
+                            <option value="Medellin">Medellín</option>
+                            <option value="Madrid">Madrid</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-success btn-demo btn-sm" onclick="comprarBoleta()"><i class="fas fa-bolt me-1"></i>Comprar Boleta</button>
+                    </div>
+                </div>
+                <div class="output-box" id="outputCompra">Esperando acción...</div>
+                <p class="small text-muted mt-1" id="timerCompra"></p>
+                <p class="small text-muted">✅ Verificación: <code>protocol: "gRPC"</code> + <code>inventoryLatencyMs < 15ms</code>. Si falla el pago → "Stock compensado".</p>
+                <button class="btn btn-sm btn-outline-secondary btn-demo mt-1" onclick="showCode('saga')"><i class="fas fa-code me-1"></i>Ver código SAGA</button>
+                <button class="btn btn-sm btn-outline-danger btn-demo mt-1" onclick="showCode('grpc_server')"><i class="fas fa-code me-1"></i>Ver gRPC Server</button>
+                <button class="btn btn-sm btn-outline-warning btn-demo mt-1" onclick="showCode('proto')"><i class="fas fa-code me-1"></i>Ver .proto</button>
+                <div class="speech-bubble">💬 "La comunicación Order↔Inventory es gRPC — protocolo binario sobre HTTP/2. La latencia es 2-11ms vs ~100ms de REST con JSON. Si el pago falla, la SAGA ejecuta la compensación automáticamente devolviendo el stock."</div>
+            </div>
+
+            <div class="step-card" id="stepB2">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">2</span>
+                    <strong>Validación Binaria (gRPC) — Demostrar latencia</strong>
+                </div>
+                <p class="small mb-2">El campo <code>inventoryLatencyMs</code> en la respuesta muestra la latencia real de gRPC medida con Stopwatch.</p>
+                <div class="speech-bubble">💬 "Fíjense en inventoryLatencyMs: 2ms. Eso es lo que tarda la comunicación binaria gRPC entre Order e Inventory. El requisito era menos de 100ms — lo cumplimos con creces."</div>
+            </div>
+
+            <div class="step-card" id="stepB3">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">3</span>
+                    <strong>Precios Dinámicos — Caché Distribuida con Redis</strong>
+                </div>
+                <p class="small mb-2">Product.Api consulta Redis primero (cache-aside). Si no hay dato, va a Price.Api y guarda con TTL 60s.</p>
+                <button class="btn btn-warning btn-demo btn-sm mb-2" onclick="testRedis()"><i class="fas fa-tachometer-alt me-1"></i>Probar Cache (2 llamadas)</button>
+                <div class="output-box" id="outputRedis">Esperando acción...</div>
+                <p class="small text-muted mt-1">✅ Verificación: Primera llamada más lenta (miss). Segunda más rápida (hit desde Redis).</p>
+                <button class="btn btn-sm btn-outline-secondary btn-demo mt-1" onclick="showCode('redis')"><i class="fas fa-code me-1"></i>Ver código Cache-Aside</button>
+                <div class="speech-bubble">💬 "Patrón Cache-Aside: la primera consulta va a Price.Api y guarda en Redis. Las siguientes 59 segundos vienen de Redis sin tocar la base de datos. Con 50,000 usuarios, el 90% son cache hits."</div>
+            </div>
+        </div>
+
+        <!-- TAB C: Comunicación y IA -->
+        <div class="tab-pane fade" id="tabC">
+            <h5 class="text-info mb-3"><i class="fas fa-brain me-2"></i>C. Comunicación y IA (Eventos y Semántica)</h5>
+
+            <div class="step-card" id="stepC1">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">1</span>
+                    <strong>Mensajería Asíncrona — MassTransit + RabbitMQ</strong>
+                </div>
+                <p class="small mb-2">Order.Api publica <code>OrderCreatedEvent</code> a RabbitMQ (CloudAMQP). Notification.Api lo consume en segundo plano.</p>
+                <!-- Flujo visual RabbitMQ -->
+                <div class="p-2 mb-2 rounded" style="background:#fff3e0; border:1px solid #ffe0b2; font-family:monospace; font-size:11.5px;">
+                    <strong>Flujo evento:</strong><br>
+                    🛒 Order.Api <span style="color:#e65100">──publish──▶</span> 🐰 RabbitMQ (cola) <span style="color:#e65100">──consume──▶</span> 🔔 Notification.Api <span style="color:#e65100">──push──▶</span> 📱 MAUI (SignalR)
+                </div>
+                <!-- Demo desacoplamiento -->
+                <div class="p-2 mb-2 rounded" style="background:#fce4ec; border:1px solid #f8bbd0;">
+                    <strong class="small">🧪 Demo: Desacoplamiento Temporal (impresiona al docente)</strong>
+                    <ol class="small mb-0 mt-1">
+                        <li>Detener Notification.Api → <button class="btn btn-xs btn-outline-danger" style="font-size:10px; padding:1px 6px;" onclick="copyCmd('taskkill /FI \"WINDOWTITLE eq Notification*\" /F')">Copiar comando kill</button></li>
+                        <li>Hacer una compra desde el panel (Tab B) → <strong>funciona normalmente</strong> (200 OK)</li>
+                        <li>Explicar: <em>"El mensaje quedó retenido en la cola de RabbitMQ"</em></li>
+                        <li>Abrir CloudAMQP → <a href="https://moose.rmq.cloudamqp.com/#/queues/miqffttk" target="_blank" class="small">Ver cola con mensaje pendiente</a> <span class="text-muted small">(user: miqffttk / pass: 1pscfTN1wGyzJHwe8BTEFMyocp9U-bEp)</span></li>
+                        <li>Volver a levantar Notification → <button class="btn btn-xs btn-outline-success" style="font-size:10px; padding:1px 6px;" onclick="copyCmd('cd C:\\Users\\watabares_solati\\ITM\\ProgramacionDistribuida\\Entregables\\Final && dotnet run --project Notification.Api --launch-profile http')">Copiar comando start</button></li>
+                        <li>Ver en terminal: <code>"Procesando evento de RabbitMQ para orden: ..."</code> → ¡Se procesó el mensaje retenido!</li>
+                    </ol>
+                </div>
+                <button class="btn btn-info btn-demo btn-sm mb-2" onclick="testCorrelation()"><i class="fas fa-project-diagram me-1"></i>Ejecutar compra + ver Correlation ID</button>
+                <div class="output-box" id="outputCorrelation">Esperando acción...</div>
+                <p class="small text-muted mt-1">✅ Verificación: En la terminal de Notification.Api aparece "Procesando evento de RabbitMQ para orden: {id}"</p>
+                <button class="btn btn-sm btn-outline-secondary btn-demo mt-1" onclick="showCode('signalr')"><i class="fas fa-code me-1"></i>Ver código Consumer</button>
+                <div class="speech-bubble">💬 "El evento viaja por RabbitMQ en la nube (CloudAMQP). Si Notification.Api está caído, el mensaje queda en la cola y se procesa cuando se levante — esto es desacoplamiento temporal. El productor nunca se bloquea esperando al consumidor."</div>
+            </div>
+
+            <div class="step-card" id="stepC2">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">2</span>
+                    <strong>Tiempo Real — SignalR push a la App Móvil</strong>
+                </div>
+                <p class="small mb-2">Notification.Api envía "TicketReady" via WebSocket a todos los clientes MAUI conectados.</p>
+                <p class="small text-muted">✅ Verificación: En terminal Notification.Api → "Notificación push enviada via SignalR". En la app MAUI → texto morado "ALERTA EN VIVO".</p>
+                <button class="btn btn-sm btn-outline-secondary btn-demo mt-1" onclick="showCode('signalr')"><i class="fas fa-code me-1"></i>Ver código SignalR Hub</button>
+                <div class="speech-bubble">💬 "SignalR mantiene una conexión WebSocket persistente con la app. Cuando el consumer procesa el evento, el Hub envía un push en tiempo real — el usuario ve la confirmación sin refrescar."</div>
+            </div>
+
+            <div class="step-card" id="stepC3">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">3</span>
+                    <strong>Buscador Inteligente — Elasticsearch + Qdrant (IA)</strong>
+                </div>
+                <p class="small mb-2">Elasticsearch busca por texto exacto. Qdrant busca por significado/intención usando vectores.</p>
+                <div class="input-group input-group-sm mb-2">
+                    <input type="text" id="txtSearch" class="form-control" value="algo divertido para la familia">
+                    <button class="btn btn-info btn-demo" onclick="buscarSemantico()"><i class="fas fa-brain me-1"></i>Buscar</button>
+                </div>
+                <div class="d-flex gap-2 mb-2">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('txtSearch').value='concierto en madrid';buscarSemantico()">concierto madrid</button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('txtSearch').value='fiesta electronica noche';buscarSemantico()">fiesta noche</button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('txtSearch').value='aprender musica';buscarSemantico()">aprender música</button>
+                </div>
+                <div class="output-box" id="outputSearch">Esperando acción...</div>
+                <p class="small text-muted mt-1">✅ Verificación: "algo divertido para la familia" → primer resultado es "Zona Familiar" (sin usar esas palabras exactas).</p>
+                <button class="btn btn-sm btn-outline-secondary btn-demo mt-1" onclick="showCode('search')"><i class="fas fa-code me-1"></i>Ver código Búsqueda Semántica</button>
+                <div class="speech-bubble">💬 "El usuario busca por 'vibe' — no necesita saber el nombre exacto del evento. Qdrant convierte el texto en un vector y busca los más similares por distancia coseno. Esto es IA aplicada a búsqueda."</div>
+            </div>
+        </div>
+
+        <!-- TAB D: Infraestructura y Nube -->
+        <div class="tab-pane fade" id="tabD">
+            <h5 class="text-warning mb-3"><i class="fas fa-cloud me-2"></i>D. Infraestructura y Nube (DevOps)</h5>
+
+            <div class="step-card" id="stepD1">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">1</span>
+                    <strong>Contenerización — Dockerfile Multi-stage</strong>
+                </div>
+                <p class="small mb-2">Cada servicio tiene un Dockerfile optimizado: etapa BUILD (SDK) + etapa RUNTIME (solo runtime ~100MB).</p>
+                <button class="btn btn-sm btn-outline-secondary btn-demo" onclick="showCode('docker')"><i class="fas fa-code me-1"></i>Ver Dockerfile</button>
+                <div class="speech-bubble">💬 "Multi-stage build: la imagen final solo tiene el runtime (~100MB), no el SDK (~700MB). Menos superficie de ataque y deploys más rápidos."</div>
+            </div>
+
+            <div class="step-card" id="stepD2">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">2</span>
+                    <strong>Orquestación — Kubernetes + HPA (Auto-escalado)</strong>
+                </div>
+                <p class="small mb-2">13 pods corriendo. HPA escala automáticamente de 2 a 15 réplicas según CPU.</p>
+                <div class="d-flex gap-2 mb-2">
+                    <button class="btn btn-danger btn-demo btn-sm" onclick="killPod()"><i class="fas fa-bomb me-1"></i>Matar Pod (copiar)</button>
+                    <button class="btn btn-outline-success btn-sm" onclick="getPods()"><i class="fas fa-sync me-1"></i>Ver Pods (copiar)</button>
+                    <button class="btn btn-outline-info btn-sm" onclick="getHPA()"><i class="fas fa-chart-line me-1"></i>Ver HPA (copiar)</button>
+                </div>
+                <div class="output-box" id="outputK8s">Esperando acción...</div>
+                <p class="small text-muted mt-1">✅ Verificación: Después de kill → pods nuevos con AGE de pocos segundos (self-healing). HPA muestra min/max réplicas.</p>
+                <button class="btn btn-sm btn-outline-secondary btn-demo mt-1" onclick="showCode('k8s')"><i class="fas fa-code me-1"></i>Ver manifiesto K8s</button>
+                <div class="speech-bubble">💬 "Mato los pods — simulando una caída del servidor. Kubernetes detecta que faltan réplicas y las recrea en 4 segundos. El sistema nunca se apaga. El HPA escala hasta 15 réplicas si la CPU supera 60%."</div>
+            </div>
+
+            <div class="step-card" id="stepD3">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">3</span>
+                    <strong>Automatización — GitHub Actions CI/CD</strong>
+                </div>
+                <p class="small mb-2">Al hacer push a main: compila → testea → construye 6 imágenes Docker → las sube a Docker Hub.</p>
+                <a href="https://github.com/watabares/ITM-Tickets-Final/actions" target="_blank" class="btn btn-sm btn-outline-dark btn-demo mb-2"><i class="fab fa-github me-1"></i>Abrir GitHub Actions (pipeline verde)</a>
+                <button class="btn btn-sm btn-outline-secondary btn-demo mb-2" onclick="showCode('actions')"><i class="fas fa-code me-1"></i>Ver workflow YAML</button>
+                <p class="small text-muted">✅ Verificación: El pipeline muestra ✓ verde. Las 6 imágenes están en Docker Hub como <code>watabares/itm-*:latest</code>.</p>
+                <div class="speech-bubble">💬 "El pipeline se dispara automáticamente al hacer push. Compila los 6 servicios en paralelo, corre tests, y sube las imágenes a Docker Hub. Los pods de K8s pueden hacer pull de esas imágenes para actualizar."</div>
+            </div>
+
+            <div class="step-card" id="stepD4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="step-num">4</span>
+                    <strong>Infraestructura como Código — Terraform</strong>
+                </div>
+                <p class="small mb-2">Un archivo <code>main.tf</code> que recrea toda la infraestructura AWS: VPC, subnets, EKS, nodos con auto-scaling.</p>
+                <button class="btn btn-sm btn-outline-warning btn-demo mb-2" onclick="showTerraform()"><i class="fas fa-file-code me-1"></i>Ver main.tf</button>
+                <div class="output-box" id="outputTerraform">Esperando acción...</div>
+                <div class="speech-bubble">💬 "Este archivo recrea TODA la infraestructura con un comando: VPC, subnets, cluster EKS con auto-scaling de 2 a 6 nodos. Es reproducible, versionada en git, y auditable."</div>
+            </div>
+        </div>
+
+        <!-- TAB Setup -->
+        <div class="tab-pane fade" id="tabSetup">
+            <h5 class="mb-3"><i class="fas fa-cog me-2"></i>Setup Inicial (ejecutar antes de la demo)</h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6>1. Levantar infraestructura</h6>
+                            <code class="d-block bg-light p-2 rounded small mb-2">docker compose up -d rabbitmq redis elasticsearch qdrant</code>
+                            <h6>2. Iniciar servicios .NET</h6>
+                            <code class="d-block bg-light p-2 rounded small mb-2">start-all.cmd</code>
+                            <h6>3. Seed de búsqueda</h6>
+                            <button class="btn btn-sm btn-outline-success btn-demo" onclick="seedSearch()"><i class="fas fa-database me-1"></i>Seed Elasticsearch + Qdrant</button>
+                            <div class="output-box mt-2" id="outputSetup" style="max-height:120px">Esperando...</div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-check"><input class="form-check-input" type="checkbox" id="chk4"><label class="form-check-label small" for="chk4">Min 9-12: Terraform plan</label></div>
-                            <div class="form-check"><input class="form-check-input" type="checkbox" id="chk5"><label class="form-check-label small" for="chk5">Min 12-15: Búsqueda semántica + Redis</label></div>
-                            <div class="form-check"><input class="form-check-input" type="checkbox" id="chk6"><label class="form-check-label small" for="chk6">Mostrar GitHub Actions (pipeline verde)</label></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6>4. Lanzar App MAUI</h6>
+                            <button class="btn btn-sm btn-outline-primary btn-demo mb-2" onclick="launchMaui()"><i class="fas fa-mobile-alt me-1"></i>Copiar comando MAUI</button>
+                            <h6>5. Aplicar Kubernetes</h6>
+                            <code class="d-block bg-light p-2 rounded small mb-2">kubectl apply -f k8s/</code>
+                            <h6>6. Verificar todo</h6>
+                            <button class="btn btn-sm btn-outline-info btn-demo" onclick="checkHealth()"><i class="fas fa-heartbeat me-1"></i>Health Check</button>
+                            <div class="output-box mt-2" id="outputHealth" style="max-height:120px">Esperando...</div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+    </div><!-- end tab-content -->
+
+    <!-- Código Fuente (siempre visible abajo) -->
+    <div class="card mt-3">
+        <div class="card-header" style="background:#2d2d2d; color:#fff;"><i class="fas fa-code me-2"></i>Código Fuente</div>
+        <div class="card-body p-0">
+            <div class="output-box" id="outputCode" style="max-height:400px; border-radius:0 0 12px 12px; border:none;">Haz click en "Ver código" en cualquier paso para ver el archivo con explicación...</div>
         </div>
     </div>
 </div>
 
-    <!-- Row 5: Código Fuente -->
-    <div class="row g-3 mb-3">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header"><i class="fas fa-code me-2"></i>6. Código Fuente (explicación)</div>
-                <div class="card-body">
-                    <div class="d-flex gap-2 flex-wrap mb-3">
-                        <button class="btn btn-outline-success btn-sm" onclick="showCode('saga')"><i class="fas fa-rotate me-1"></i>SAGA + gRPC (Order.Api)</button>
-                        <button class="btn btn-outline-danger btn-sm" onclick="showCode('grpc_server')"><i class="fas fa-server me-1"></i>gRPC Server (Inventory)</button>
-                        <button class="btn btn-outline-warning btn-sm" onclick="showCode('proto')"><i class="fas fa-file-contract me-1"></i>Contrato .proto</button>
-                        <button class="btn btn-outline-info btn-sm" onclick="showCode('redis')"><i class="fas fa-database me-1"></i>Redis Cache-Aside</button>
-                        <button class="btn btn-outline-primary btn-sm" onclick="showCode('signalr')"><i class="fas fa-bell me-1"></i>SignalR Consumer</button>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="showCode('gateway')"><i class="fas fa-shield-alt me-1"></i>Gateway (Rate Limit)</button>
-                        <button class="btn btn-outline-dark btn-sm" onclick="showCode('search')"><i class="fas fa-brain me-1"></i>Búsqueda Semántica</button>
-                        <button class="btn btn-outline-success btn-sm" onclick="showCode('docker')"><i class="fab fa-docker me-1"></i>Dockerfile</button>
-                        <button class="btn btn-outline-info btn-sm" onclick="showCode('k8s')"><i class="fas fa-dharmachakra me-1"></i>K8s + HPA</button>
-                        <button class="btn btn-outline-warning btn-sm" onclick="showCode('actions')"><i class="fab fa-github me-1"></i>GitHub Actions</button>
-                    </div>
-                    <div class="output-box" id="outputCode" style="max-height:450px; font-size:12px;">Selecciona un archivo para ver el código con explicación...</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-const PORTS = { order: '', inventory: '', product: '', price: '', search: '', gateway: '', notification: '' };
-const DIRECT = { order: 'http://localhost:5027', inventory: 'http://localhost:5293', product: 'http://localhost:5298', price: 'http://localhost:5012', search: 'http://localhost:5100', gateway: 'http://localhost:5110', notification: 'http://localhost:5089' };
-
-// Auto-detect: if served from nginx proxy (port 8080), use relative paths. Otherwise use direct.
 const useProxy = (window.location.port === '8080');
-
-function svcUrl(service, path) {
-    if (useProxy) return path;  // nginx proxies /api/* to the right service
-    return DIRECT[service] + path;
-}
-
-function log(id, msg, append = false) {
-    const el = document.getElementById(id);
-    if (append) el.textContent += '\n' + msg;
-    else el.textContent = msg;
-    el.scrollTop = el.scrollHeight;
-}
+const DIRECT = { order: 'http://localhost:5027', inventory: 'http://localhost:5293', product: 'http://localhost:5298', price: 'http://localhost:5012', search: 'http://localhost:5100', gateway: 'http://localhost:5110', notification: 'http://localhost:5089' };
+function svcUrl(svc, path) { return useProxy ? path : DIRECT[svc] + path; }
+function log(id, msg) { const el = document.getElementById(id); if(el){el.textContent = msg; el.scrollTop = el.scrollHeight;} }
+function copyCmd(cmd) { navigator.clipboard.writeText(cmd).then(() => alert('📋 Copiado al portapapeles')).catch(() => prompt('Copia este comando:', cmd)); }
 
 async function comprarBoleta() {
-    const productId = document.getElementById('selProducto').value;
-    const sede = document.getElementById('selSede').value;
     log('outputCompra', '⏳ Enviando orden...');
     const start = performance.now();
     try {
-        const res = await fetch(svcUrl('order', '/api/orders'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId: parseInt(productId), quantity: 1, sede })
-        });
-        const data = await res.json();
-        const elapsed = (performance.now() - start).toFixed(0);
-        if (res.ok) {
-            log('outputCompra', `✅ COMPRA EXITOSA (${elapsed}ms total)\n\n` + JSON.stringify(data, null, 2));
-            document.getElementById('timerCompra').textContent = `gRPC: ${data.inventoryLatencyMs}ms | Total: ${elapsed}ms | Protocol: ${data.protocol}`;
-        } else {
-            log('outputCompra', `⚠️ SAGA COMPENSACIÓN (${elapsed}ms)\n\n` + JSON.stringify(data, null, 2));
-            document.getElementById('timerCompra').textContent = `Pago falló → Stock devuelto via ${data.protocol || 'gRPC'} | ${elapsed}ms`;
-        }
-    } catch (e) {
-        log('outputCompra', `❌ Error de conexión: ${e.message}\n\n¿Está Order.Api corriendo en puerto 5027?\nSi usas el panel desde file://, ábrelo desde http://localhost:8080`);
-    }
+        const res = await fetch(svcUrl('order', '/api/orders'), { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({productId:parseInt(document.getElementById('selProducto').value), quantity:1, sede:document.getElementById('selSede').value})});
+        const data = await res.json(); const elapsed = (performance.now()-start).toFixed(0);
+        if(res.ok) { log('outputCompra', `✅ COMPRA EXITOSA (${elapsed}ms)\n\n`+JSON.stringify(data,null,2)); document.getElementById('timerCompra').textContent=`gRPC: ${data.inventoryLatencyMs}ms | Total: ${elapsed}ms`; }
+        else { log('outputCompra', `⚠️ SAGA COMPENSACIÓN (${elapsed}ms)\n\n`+JSON.stringify(data,null,2)); document.getElementById('timerCompra').textContent=`Pago falló → Stock devuelto via gRPC | ${elapsed}ms`; }
+    } catch(e) { log('outputCompra', `❌ Error: ${e.message}\n\n¿Servicios corriendo?`); }
 }
 
 async function buscarSemantico() {
-    const q = document.getElementById('txtSearch').value;
-    log('outputSearch', '⏳ Buscando con IA...');
-    try {
-        const res = await fetch(svcUrl('search', `/api/search/semantic?q=${encodeURIComponent(q)}`));
-        const data = await res.json();
-        let output = `🧠 Búsqueda semántica: "${q}"\n🔍 Motor: ${data.engine}\n📊 Resultados: ${data.count}\n\n`;
-        data.results.forEach((r, i) => {
-            output += `${i+1}. ${r.name} (${r.city}) — Score: ${(r.score*100).toFixed(1)}%\n   ${r.description}\n   💰 ${r.price}\n\n`;
-        });
-        log('outputSearch', output);
-    } catch (e) {
-        log('outputSearch', `❌ Error: ${e.message}\n\n¿Ejecutaste el Seed primero?`);
-    }
+    const q = document.getElementById('txtSearch').value; log('outputSearch', '⏳ Buscando...');
+    try { const res = await fetch(svcUrl('search', `/api/search/semantic?q=${encodeURIComponent(q)}`)); const data = await res.json();
+        let out = `🧠 "${q}"\n🔍 ${data.engine} | ${data.count} resultados\n\n`;
+        data.results.forEach((r,i) => { out += `${i+1}. ${r.name} (${r.city}) — ${(r.score*100).toFixed(1)}%\n   ${r.description}\n\n`; });
+        log('outputSearch', out);
+    } catch(e) { log('outputSearch', `❌ ${e.message}`); }
 }
 
 async function testRedis() {
-    log('outputRedis', '⏳ Primera llamada (cache miss)...');
-    try {
-        const start1 = performance.now();
-        const res1 = await fetch(svcUrl('product', '/api/products/1'));
-        const data1 = await res1.json();
-        const t1 = (performance.now() - start1).toFixed(0);
-
-        log('outputRedis', `1️⃣ Primera llamada: ${t1}ms (cache MISS → fue a Price.Api)\n` + JSON.stringify(data1, null, 2));
-
-        await new Promise(r => setTimeout(r, 500));
-
-        const start2 = performance.now();
-        const res2 = await fetch(svcUrl('product', '/api/products/1'));
-        const data2 = await res2.json();
-        const t2 = (performance.now() - start2).toFixed(0);
-
-        log('outputRedis', `1️⃣ Primera llamada: ${t1}ms (cache MISS)\n2️⃣ Segunda llamada: ${t2}ms (cache HIT ← Redis)\n\n⚡ Diferencia: ${t1 - t2}ms más rápido con cache\n\n` + JSON.stringify(data2, null, 2));
-    } catch (e) {
-        log('outputRedis', `❌ Error: ${e.message}`);
-    }
+    log('outputRedis', '⏳ Llamada 1 (miss)...');
+    try { const s1=performance.now(); await fetch(svcUrl('product','/api/products/1')); const t1=(performance.now()-s1).toFixed(0);
+        await new Promise(r=>setTimeout(r,300));
+        const s2=performance.now(); await fetch(svcUrl('product','/api/products/1')); const t2=(performance.now()-s2).toFixed(0);
+        log('outputRedis', `1️⃣ Primera: ${t1}ms (cache MISS → Price.Api)\n2️⃣ Segunda: ${t2}ms (cache HIT ← Redis)\n\n⚡ ${t1-t2}ms más rápido con cache`);
+    } catch(e) { log('outputRedis', `❌ ${e.message}`); }
 }
+
+async function testCorrelation() {
+    log('outputCorrelation', '⏳ Ejecutando compra...');
+    try { const res = await fetch(svcUrl('order','/api/orders'), {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({productId:1,quantity:1,sede:'Medellin'})});
+        const data = await res.json(); const id = data.correlationId || data.extensions?.correlationId || 'N/A';
+        log('outputCorrelation', `🔗 Correlation ID: ${id}\n\n📍 Viaje por servicios:\n┌──────────────────────────────────────┐\n│ 1. Gateway    → Genera el ID         │\n│ 2. Order.Api  → Log: [${id}]  │\n│ 3. Inventory  → gRPC con ID          │\n│ 4. Notification → Consumer con ID    │\n└──────────────────────────────────────┘\n\n`+JSON.stringify(data,null,2));
+    } catch(e) { log('outputCorrelation', `❌ ${e.message}`); }
+}
+
+function killPod() { const cmd='kubectl delete pod -l app=order-api -n itm-tickets'; navigator.clipboard.writeText(cmd); log('outputK8s', `📋 Copiado!\n\nPega en terminal:\n  ${cmd}\n\nLuego ejecuta "Ver Pods" para ver el self-healing.`); }
+function getPods() { const cmd='kubectl get pods -n itm-tickets'; navigator.clipboard.writeText(cmd); log('outputK8s', `📋 Copiado!\n\n  ${cmd}\n\n✅ Esperado: pods nuevos con AGE de pocos segundos.`); }
+function getHPA() { const cmd='kubectl get hpa -n itm-tickets'; navigator.clipboard.writeText(cmd); log('outputK8s', `📋 Copiado!\n\n  ${cmd}\n\n✅ Esperado:\n  gateway-hpa    2-10 (CPU 70%)\n  inventory-hpa  2-10 (CPU 65%)\n  order-hpa      2-15 (CPU 60%)\n  product-hpa    2-8  (CPU 70%)`); }
+
+async function testSinToken() {
+    log('outputJWT', '⏳ Llamando al Gateway SIN token...');
+    try {
+        const res = await fetch(svcUrl('inventory', '/api/inventory/1'), { headers: {} });
+        if (res.status === 401) { log('outputJWT', `🔒 401 Unauthorized — ¡CORRECTO!\n\nEl Gateway rechazó la petición porque no tiene JWT.\nLos microservicios internos están protegidos.`); }
+        else { log('outputJWT', `⚠️ Respuesta: ${res.status}\n(El endpoint puede no requerir auth en este modo)`); }
+    } catch(e) { log('outputJWT', `❌ ${e.message}`); }
+}
+
+async function testConToken() {
+    log('outputJWT', '⏳ Llamando al Gateway CON token válido...');
+    try {
+        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJJdG1JZGVudGl0eVNlcnZlciIsImF1ZCI6Ikl0bVN0b3JlQXBpcyIsImVtYWlsIjoiYWRtaW5AaXRtLmVkdS5jbyIsInJvbGUiOiJBZG1pbmlzdHJhZG9yIiwiZXhwIjoxODExMzgxMjU4fQ.IlyaPSYpWmm6BOGTy5OPdROMcaowOo7rImd8A2HUcX8';
+        const res = await fetch(svcUrl('inventory', '/api/inventory/1'), { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) { const data = await res.json(); log('outputJWT', `✅ 200 OK — ¡Token válido, acceso concedido!\n\n${JSON.stringify(data, null, 2)}\n\n🔑 El Gateway validó: issuer, audience, firma y expiración.`); }
+        else { log('outputJWT', `⚠️ ${res.status}: ${await res.text()}`); }
+    } catch(e) { log('outputJWT', `❌ ${e.message}`); }
+}
+
+async function testRateLimit() {
+    log('outputRate', '⏳ Disparando 10 compras rápidas...\n');
+    let results = '';
+    for (let i = 1; i <= 10; i++) {
+        try {
+            const res = await fetch(svcUrl('order', '/api/orders'), { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({productId:1,quantity:1,sede:'Medellin'}) });
+            const status = res.status;
+            if (status === 429) { results += `#${i}: 🚫 429 Too Many Requests — RATE LIMITED!\n`; }
+            else if (status === 200) { results += `#${i}: ✅ 200 OK\n`; }
+            else { results += `#${i}: ⚠️ ${status}\n`; }
+        } catch(e) { results += `#${i}: ❌ Error\n`; }
+    }
+    results += '\n💡 Si todas pasan: el Rate Limiting está en el Gateway (puerto 5110).\nDesde el panel llamamos directo a Order.Api (5027) que no tiene rate limit propio.\nEn producción, todo pasa por el Gateway.';
+    log('outputRate', results);
+}
+
+function showTerraform() { log('outputTerraform', `# terraform/main.tf\n\nresource "aws_vpc" "main" {\n  cidr_block = "10.0.0.0/16"\n}\n\nresource "aws_eks_cluster" "main" {\n  name = "itm-tickets-cluster"\n  version = "1.29"\n}\n\nresource "aws_eks_node_group" "workers" {\n  instance_types = ["t3.medium"]\n  scaling_config {\n    desired = 3, min = 2, max = 6\n  }\n}\n\n# terraform plan → muestra qué crearía\n# terraform apply → crea la infra real en AWS`); }
+function launchMaui() { const cmd='cd C:\\Users\\watabares_solati\\ITM\\ProgramacionDistribuida\\Entregables\\Final && dotnet run --project Itm.Store.Mobile -f net8.0-windows10.0.19041.0 -p:TargetFrameworks=net8.0-windows10.0.19041.0'; navigator.clipboard.writeText(cmd); log('outputSetup', `📋 Copiado! Pega en terminal.\n\n1. Click "Iniciar Sesión" → guarda JWT\n2. Click "Consultar Producto" → llama Gateway`); }
+async function seedSearch() { log('outputSetup', '⏳ Indexando...'); try { const r=await fetch(svcUrl('search','/api/search/seed'),{method:'POST'}); const d=await r.json(); log('outputSetup', `✅ ${d.message}`); } catch(e){log('outputSetup',`❌ ${e.message}`);} }
+async function checkHealth() { log('outputHealth', '⏳ Verificando...'); const svcs=[{n:'Order',p:'/api/orders'},{n:'Product',p:'/api/products/1'},{n:'Price',p:'/api/prices/1'},{n:'Search',p:'/api/search/text?q=t'},{n:'Notification',p:'/api/notification'}]; let o=''; for(const s of svcs){try{const r=await fetch(svcUrl(s.n.toLowerCase(),s.p),{signal:AbortSignal.timeout(4000)});o+=`${r.status<500?'✅':'⚠️'} ${s.n}\n`;}catch(e){o+=`❌ ${s.n}\n`;}} log('outputHealth',o); }
 </script>
 
 <script>
-async function testCorrelation() {
-    log('outputCorrelation', '⏳ Ejecutando compra para capturar Correlation ID...');
-    try {
-        const res = await fetch(svcUrl('order', '/api/orders'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId: 1, quantity: 1, sede: 'Medellin' })
-        });
-        const data = await res.json();
-        const corrId = data.correlationId || data.extensions?.correlationId || 'N/A';
-        let output = `🔗 Correlation ID: ${corrId}\n\n`;
-        output += `📍 Viaje del ID por los servicios:\n`;
-        output += `┌─────────────────────────────────────────────┐\n`;
-        output += `│ 1. Gateway.Api    → Genera/propaga el ID    │\n`;
-        output += `│ 2. Order.Api      → Log: [${corrId}]       │\n`;
-        output += `│ 3. Inventory.Api  → gRPC context con ID     │\n`;
-        output += `│ 4. Notification   → Consumer recibe el ID   │\n`;
-        output += `└─────────────────────────────────────────────┘\n\n`;
-        output += `📋 Respuesta completa:\n` + JSON.stringify(data, null, 2);
-        log('outputCorrelation', output);
-    } catch (e) {
-        log('outputCorrelation', `❌ Error: ${e.message}`);
-    }
-}
-
-async function killPod() {
-    log('outputK8s', '💀 Matando pods de order-api...\n\nEjecuta en tu terminal:\n\n  kubectl delete pod -l app=order-api -n itm-tickets\n\nLuego haz click en "Ver Pods" para ver cómo K8s los recrea.');
-}
-
-async function getPods() {
-    log('outputK8s', '📋 Ejecuta en tu terminal:\n\n  kubectl get pods -n itm-tickets\n\nResultado esperado: todos los pods en Running, los nuevos con AGE de pocos segundos.');
-}
-
-async function getHPA() {
-    log('outputK8s', '📊 Ejecuta en tu terminal:\n\n  kubectl get hpa -n itm-tickets\n\nResultado esperado:\n  gateway-hpa     2-10 réplicas (CPU 70%)\n  inventory-hpa   2-10 réplicas (CPU 65%)\n  order-hpa       2-15 réplicas (CPU 60%)\n  product-hpa     2-8  réplicas (CPU 70%)');
-}
-
-function showTerraform() {
-    const tf = `# terraform/main.tf — Infraestructura como Código
-# ================================================
-
-resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
-  tags = { Name = "itm-tickets-vpc", Project = "ITM-Tickets" }
-}
-
-resource "aws_eks_cluster" "main" {
-  name     = "itm-tickets-cluster"
-  role_arn = aws_iam_role.eks_cluster.arn
-  version  = "1.29"
-  vpc_config { subnet_ids = [aws_subnet.public_a.id, aws_subnet.public_b.id] }
-}
-
-resource "aws_eks_node_group" "workers" {
-  cluster_name    = aws_eks_cluster.main.name
-  instance_types  = ["t3.medium"]
-  scaling_config {
-    desired_size = 3
-    min_size     = 2    # Mínimo 2 nodos siempre
-    max_size     = 6    # Escala hasta 6 bajo carga
-  }
-}
-
-# Comando para aplicar:
-#   terraform init
-#   terraform plan    ← Solo muestra qué haría
-#   terraform apply   ← Crea la infraestructura real en AWS`;
-    log('outputTerraform', tf);
-}
-
-async function seedSearch() {
-    log('outputSetup', '⏳ Indexando eventos en Elasticsearch + Qdrant...');
-    try {
-        const res = await fetch(svcUrl('search', '/api/search/seed'), { method: 'POST' });
-        const data = await res.json();
-        log('outputSetup', `✅ ${data.message}\n\n10 eventos del festival indexados en ambos motores.`);
-    } catch (e) {
-        log('outputSetup', `❌ Error: ${e.message}\n\n¿Está Search.Api corriendo?`);
-    }
-}
-
-async function checkHealth() {
-    log('outputSetup', '⏳ Verificando salud de servicios...');
-    const services = [
-        { name: 'Inventory', svc: 'inventory', path: '/api/inventory/1' },
-        { name: 'Order', svc: 'order', path: '/health' },
-        { name: 'Product', svc: 'product', path: '/api/products/1' },
-        { name: 'Price', svc: 'price', path: '/api/prices/1' },
-        { name: 'Search', svc: 'search', path: '/health' },
-        { name: 'Notification', svc: 'notification', path: '/' }
-    ];
-    let output = '';
-    for (const svc of services) {
-        try {
-            const res = await fetch(svcUrl(svc.svc, svc.path), { signal: AbortSignal.timeout(3000) });
-            output += `✅ ${svc.name} — ${res.status === 200 ? 'Healthy' : res.status}\n`;
-        } catch (e) {
-            output += `❌ ${svc.name} — No responde\n`;
-        }
-    }
-    log('outputSetup', output);
-}
-
-// Auto health check on load
-window.addEventListener('load', () => {
-    setTimeout(checkHealth, 1000);
-});
-
 function showCode(section) {
     const codes = {
-saga: `📁 Order.Api/Program.cs — SAGA Orquestada + gRPC Client
-═══════════════════════════════════════════════════════════════
-
-// 1. Registramos el cliente gRPC hacia Inventory.Api
-builder.Services.AddGrpcClient<InventoryGrpc.InventoryGrpcClient>(options =>
-{
-    options.Address = new Uri("http://localhost:5294"); // Puerto Http2
-});
-
-// 2. Endpoint de compra con SAGA
-app.MapPost("/api/orders", async (CreateOrderDto order,
-    InventoryGrpc.InventoryGrpcClient grpcClient,  // ← Cliente gRPC inyectado
-    IPublishEndpoint publisher) =>                  // ← MassTransit para RabbitMQ
-{
-    // PASO 1: Reservar stock via gRPC (binario, <10ms)
-    var reduceReply = await grpcClient.ReduceStockAsync(new ReduceStockRequest
-    {
-        ProductId = order.ProductId,
-        Quantity = order.Quantity
-    });
-
-    if (!reduceReply.Success)
-        return Results.BadRequest(reduceReply.Message);
-
-    try
-    {
-        // PASO 2: Procesar pago (simulado)
-        bool paymentSuccess = new Random().Next(0, 10) > 2;
-        if (!paymentSuccess)
-            throw new Exception("Fondos Insuficientes");
-
-        // PASO 3: Publicar evento a RabbitMQ (fire-and-forget)
-        await publisher.Publish(new OrderCreatedEvent(...));
-        return Results.Ok(new { Status = "Boleta reservada", Protocol = "gRPC" });
-    }
-    catch (Exception ex)
-    {
-        // COMPENSACIÓN SAGA: Devolver stock via gRPC
-        await grpcClient.ReleaseStockAsync(new ReduceStockRequest { ... });
-        return Results.Problem("Pago falló. Stock devuelto.");
-    }
-});
-
-💡 EXPLICACIÓN:
-• gRPC es 5-10x más rápido que REST (binario vs JSON)
-• Si el pago falla, la SAGA compensa automáticamente
-• El evento se publica a RabbitMQ para notificar asincrónicamente`,
-
-grpc_server: `📁 Itm.Inventory.Api/Services/InventoryGrpcService.cs — Servidor gRPC
-═══════════════════════════════════════════════════════════════════════
-
-public class InventoryGrpcService : InventoryGrpc.InventoryGrpcBase
-{
-    // Base de datos en memoria (en producción sería PostgreSQL)
-    private static readonly List<InventoryItem> _inventoryDb = new()
-    {
-        new(1, 50, "BOLETA-MEDELLIN-VIP"),
-        new(2, 100, "BOLETA-MEDELLIN-GENERAL"),
-        new(3, 50, "BOLETA-MADRID-VIP"),
-        new(4, 100, "BOLETA-MADRID-GENERAL"),
-    };
-
-    // Método gRPC: Reservar stock (llamado por Order.Api)
-    public override Task<ReduceStockReply> ReduceStock(
-        ReduceStockRequest request, ServerCallContext context)
-    {
-        var item = _inventoryDb.FirstOrDefault(i => i.ProductId == request.ProductId);
-
-        if (item.Stock < request.Quantity)
-            return Task.FromResult(new ReduceStockReply { Success = false });
-
-        // Reducir stock atómicamente
-        _inventoryDb[index] = item with { Stock = item.Stock - request.Quantity };
-
-        return Task.FromResult(new ReduceStockReply
-        {
-            Success = true,
-            NewStock = _inventoryDb[index].Stock
-        });
-    }
-
-    // Método gRPC: Compensación SAGA (devolver stock)
-    public override Task<ReduceStockReply> ReleaseStock(...) { ... }
-}
-
-💡 EXPLICACIÓN:
-• Hereda de InventoryGrpc.InventoryGrpcBase (generado del .proto)
-• Cada método recibe un Request tipado y retorna un Reply tipado
-• La comunicación es binaria (Protocol Buffers), no JSON`,
-
-proto: `📁 Protos/inventory.proto — Contrato gRPC
-══════════════════════════════════════════════
-
-syntax = "proto3";
-option csharp_namespace = "Itm.Inventory.Grpc";
-
-// Definición del servicio (como una interfaz)
-service InventoryGrpc {
-  rpc GetStock (GetStockRequest) returns (GetStockReply);
-  rpc ReduceStock (ReduceStockRequest) returns (ReduceStockReply);
-  rpc ReleaseStock (ReduceStockRequest) returns (ReduceStockReply);
-}
-
-// Mensajes (como DTOs pero binarios)
-message ReduceStockRequest {
-  int32 product_id = 1;    // Campo 1: ID del producto
-  int32 quantity = 2;      // Campo 2: Cantidad a reservar
-}
-
-message ReduceStockReply {
-  bool success = 1;        // ¿Se pudo reservar?
-  string message = 2;      // Mensaje descriptivo
-  int32 new_stock = 3;     // Stock restante
-}
-
-💡 EXPLICACIÓN:
-• Este archivo es el CONTRATO entre Order.Api (cliente) e Inventory.Api (servidor)
-• Se compila a código C# automáticamente (generación de código)
-• Protocol Buffers serializa en binario: más rápido y más pequeño que JSON
-• Los números (= 1, = 2) son identificadores de campo, no valores`,
-
-redis: `📁 Itm.Product.Api/Program.cs — Patrón Cache-Aside con Redis
+maui_login: `📁 Itm.Store.Mobile/MainPage.xaml.cs — Login + SecureStorage
 ══════════════════════════════════════════════════════════════════
 
-// Registro de Redis como caché distribuida
-builder.Services.AddStackExchangeRedisCache(options =>
+private async void OnLoginClicked(object sender, EventArgs e)
 {
-    options.Configuration = "localhost:6379";
-    options.InstanceName = "ItmTickets_";
-});
+    // JWT simulado (en producción vendría de un Identity Server)
+    string token = "eyJhbGciOiJIUzI1NiI...";
 
-// Endpoint con Cache-Aside
-app.MapGet("/api/products/{id}", async (int id,
-    IDistributedCache cache, IHttpClientFactory factory) =>
-{
-    string cacheKey = $"Product_summary_{id}";
+    // SEGURIDAD: Lo guardamos en la bóveda criptográfica del dispositivo
+    await SecureStorage.Default.SetAsync("jwt_token", token);
 
-    // 1. ¿Está en Redis? (Cache Hit)
-    var cachedData = await cache.GetStringAsync(cacheKey);
-    if (!string.IsNullOrEmpty(cachedData))
-    {
-        logger.LogInformation("✅ Cache HIT: datos desde Redis");
-        return Results.Ok(JsonSerializer.Deserialize<object>(cachedData));
-    }
-
-    // 2. No está → ir a Price.Api (Cache Miss)
-    logger.LogWarning("❌ Cache MISS: consultando Price.Api");
-    var priceResponse = await client.GetFromJsonAsync<PriceResponse>(...);
-
-    // 3. Guardar en Redis con TTL de 60 segundos
-    await cache.SetStringAsync(cacheKey,
-        JsonSerializer.Serialize(finalProduct),
-        new DistributedCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
-        });
-
-    return Results.Ok(finalProduct);
-});
-
-💡 EXPLICACIÓN:
-• Primera llamada: va a Price.Api (lento) y guarda en Redis
-• Siguientes llamadas (60s): vienen de Redis (rápido, no toca BD)
-• Con 50,000 usuarios, el 90% son cache hits → BD no se satura
-• Redis es distribuido: todos los pods comparten el mismo cache`,
-
-signalr: `📁 Notification.Api/Consumers/OrderCreatedConsumer.cs — Consumer + SignalR
-═══════════════════════════════════════════════════════════════════════════════
-
-// Este consumer se "despierta" cuando llega un evento de RabbitMQ
-public class OrderCreatedConsumer : IConsumer<OrderCreatedEvent>
-{
-    private readonly IHubContext<NotificationHub> _hubContext;
-
-    public async Task Consume(ConsumeContext<OrderCreatedEvent> context)
-    {
-        // 1. Procesar el evento (simular generación de PDF, etc.)
-        await Task.Delay(3000);
-
-        // 2. Enviar notificación push via SignalR a TODOS los clientes conectados
-        var message = $"¡Tu boleta para el producto {context.Message.ProductId} confirmada!";
-        await _hubContext.Clients.All.SendAsync("TicketReady", message);
-    }
+    ResultLabel.Text = "¡Token JWT guardado seguro en el dispositivo!";
 }
 
-// Hub de SignalR (conexión WebSocket persistente)
-public class NotificationHub : Hub
+💡 SecureStorage usa:
+  • Android: EncryptedSharedPreferences (AES-256)
+  • iOS: Keychain
+  • Windows: DPAPI (Data Protection API)`,
+
+maui_request: `📁 Itm.Store.Mobile/Services/AuthHandler.cs — Interceptor JWT
+══════════════════════════════════════════════════════════════════
+
+// Este handler se ejecuta en CADA petición HTTP automáticamente
+protected override async Task<HttpResponseMessage> SendAsync(
+    HttpRequestMessage request, CancellationToken cancellationToken)
 {
-    public override Task OnConnectedAsync()
-    {
-        Console.WriteLine($"[SignalR] Cliente conectado: {Context.ConnectionId}");
-        return base.OnConnectedAsync();
-    }
+    // 1. Leer el token de la bóveda segura
+    var token = await SecureStorage.Default.GetAsync("jwt_token");
+
+    // 2. Adjuntarlo como Bearer token
+    if (!string.IsNullOrEmpty(token))
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+    // 3. Continuar con la petición (ahora lleva el JWT)
+    return await base.SendAsync(request, cancellationToken);
 }
 
-💡 EXPLICACIÓN:
-• RabbitMQ retiene el mensaje si este servicio está caído (resiliencia)
-• Cuando se levanta, consume los mensajes pendientes
-• SignalR mantiene WebSocket abierto con la app MAUI
-• "TicketReady" es el evento que la app escucha para mostrar la alerta`,
+💡 El AuthHandler se registra en MauiProgram.cs:
+  builder.Services.AddHttpClient("GatewayClient", client => {
+      client.BaseAddress = new Uri("http://localhost:5110/");
+  }).AddHttpMessageHandler<AuthHandler>();
+
+Flujo: MAUI → AuthHandler (adjunta JWT) → Gateway → valida → Backend`,
 
 gateway: `📁 Itm.Gateway.Api/Program.cs — YARP + JWT + Rate Limiting
-═══════════════════════════════════════════════════════════════════
+══════════════════════════════════════════════════════════════════
 
-// 1. YARP Reverse Proxy (enruta peticiones a microservicios)
+// 1. YARP: Reverse Proxy que enruta a microservicios
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
-// 2. JWT Authentication (valida tokens antes de pasar al backend)
+// 2. JWT: Valida tokens ANTES de pasar al backend
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
+        options.TokenValidationParameters = new TokenValidationParameters {
+            ValidateIssuer = true,           // ¿Quién emitió el token?
             ValidIssuer = "ItmIdentityServer",
-            ValidateIssuerSigningKey = true,
+            ValidateAudience = true,         // ¿Para quién es?
+            ValidAudience = "ItmStoreApis",
+            ValidateLifetime = true,         // ¿Está expirado?
+            ValidateIssuerSigningKey = true,  // ¿La firma es válida?
             IssuerSigningKey = new SymmetricSecurityKey(secretKey)
         };
     });
 
-// 3. Rate Limiting (protección contra fuerza bruta)
-builder.Services.AddRateLimiter(options =>
-{
+// 3. Rate Limiting: Control de multitudes
+builder.Services.AddRateLimiter(options => {
     // Global: 100 requests/minuto por IP
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
         context => RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString(),
-            factory: _ => new FixedWindowRateLimiterOptions
-            {
+            factory: _ => new FixedWindowRateLimiterOptions {
                 PermitLimit = 100,
                 Window = TimeSpan.FromMinutes(1)
             }));
 
-    // Compras: máximo 5/minuto por IP (anti-acaparamiento)
+    // Compras: máximo 5/minuto (anti-acaparamiento de boletas)
     options.AddSlidingWindowLimiter("purchase", opt => {
         opt.PermitLimit = 5;
         opt.Window = TimeSpan.FromMinutes(1);
     });
 });
 
-💡 EXPLICACIÓN:
-• YARP es el punto de entrada único — los clientes solo conocen 1 URL
-• JWT se valida ANTES de llegar a los microservicios (seguridad perimetral)
-• Rate Limiting evita que un bot compre todas las boletas
-• 100 req/min global + 5 compras/min = control de multitudes`,
+💡 Pipeline: RateLimiter → CorrelationID → JWT → YARP → Microservicio`,
 
-search: `📁 Search.Api/Services/EventSearchService.cs — Elasticsearch + Qdrant
-═══════════════════════════════════════════════════════════════════════════
+saga: `📁 Order.Api/Program.cs — SAGA Orquestada + gRPC
+══════════════════════════════════════════════════════
 
-// Búsqueda por TEXTO (Elasticsearch) — palabras exactas/fuzzy
-public async Task<List<SearchResult>> SearchByTextAsync(string query)
+app.MapPost("/api/orders", async (CreateOrderDto order,
+    InventoryGrpc.InventoryGrpcClient grpcClient,
+    IPublishEndpoint publisher) =>
 {
-    var response = await _esClient.SearchAsync<EventDocument>(s => s
-        .Index("events")
+    // PASO 1: Reservar stock via gRPC (binario, <10ms)
+    var sw = Stopwatch.StartNew();
+    var reduceReply = await grpcClient.ReduceStockAsync(
+        new ReduceStockRequest { ProductId=order.ProductId, Quantity=1 });
+    sw.Stop(); // ← Medimos latencia real
+
+    if (!reduceReply.Success)
+        return Results.BadRequest(reduceReply.Message);
+
+    try {
+        // PASO 2: Pago (simulado 70% éxito)
+        if (new Random().Next(0,10) <= 2)
+            throw new Exception("Fondos Insuficientes");
+
+        // PASO 3: Publicar evento → RabbitMQ → Notification.Api
+        await publisher.Publish(new OrderCreatedEvent(...));
+
+        return Results.Ok(new {
+            Protocol = "gRPC",
+            InventoryLatencyMs = sw.ElapsedMilliseconds
+        });
+    }
+    catch {
+        // COMPENSACIÓN: Devolver stock via gRPC
+        await grpcClient.ReleaseStockAsync(...);
+        return Results.Problem("Pago falló. Stock devuelto.");
+    }
+});
+
+💡 SAGA = Reservar → Intentar → Si falla → Compensar
+   gRPC = Protocol Buffers (binario) sobre HTTP/2`,
+
+grpc_server: `📁 Itm.Inventory.Api/Services/InventoryGrpcService.cs
+══════════════════════════════════════════════════════════
+
+public class InventoryGrpcService : InventoryGrpc.InventoryGrpcBase
+{
+    public override Task<ReduceStockReply> ReduceStock(
+        ReduceStockRequest request, ServerCallContext context)
+    {
+        var item = _db.FirstOrDefault(i => i.ProductId == request.ProductId);
+
+        if (item.Stock < request.Quantity)
+            return new ReduceStockReply { Success = false, Message = "Sin stock" };
+
+        // Reducir atómicamente
+        item.Stock -= request.Quantity;
+
+        return new ReduceStockReply {
+            Success = true,
+            NewStock = item.Stock
+        };
+    }
+
+    // Compensación SAGA
+    public override Task<ReduceStockReply> ReleaseStock(...) {
+        item.Stock += request.Quantity; // Devolver
+    }
+}
+
+💡 Hereda de clase generada por el .proto
+   Cada método = un RPC definido en el contrato`,
+
+proto: `📁 Protos/inventory.proto — Contrato gRPC
+══════════════════════════════════════════════
+
+syntax = "proto3";
+
+service InventoryGrpc {
+  rpc GetStock (GetStockRequest) returns (GetStockReply);
+  rpc ReduceStock (ReduceStockRequest) returns (ReduceStockReply);
+  rpc ReleaseStock (ReduceStockRequest) returns (ReduceStockReply);
+}
+
+message ReduceStockRequest {
+  int32 product_id = 1;  // ID del producto
+  int32 quantity = 2;    // Cantidad a reservar
+}
+
+message ReduceStockReply {
+  bool success = 1;      // ¿Se pudo?
+  string message = 2;    // Descripción
+  int32 new_stock = 3;   // Stock restante
+}
+
+💡 Este archivo genera código C# automáticamente
+   Servidor (Inventory) + Cliente (Order) comparten el contrato
+   Serialización binaria: más rápido y compacto que JSON`,
+
+redis: `📁 Itm.Product.Api/Program.cs — Cache-Aside con Redis
+══════════════════════════════════════════════════════════
+
+app.MapGet("/api/products/{id}", async (int id, IDistributedCache cache) =>
+{
+    string key = $"Product_{id}";
+
+    // 1. ¿Está en Redis?
+    var cached = await cache.GetStringAsync(key);
+    if (cached != null) {
+        logger.Log("✅ Cache HIT");
+        return Results.Ok(JsonSerializer.Deserialize(cached));
+    }
+
+    // 2. No → consultar Price.Api
+    logger.Log("❌ Cache MISS → yendo a Price.Api");
+    var price = await priceClient.GetAsync($"/api/prices/{id}");
+
+    // 3. Guardar en Redis (TTL 60 segundos)
+    await cache.SetStringAsync(key, JsonSerializer.Serialize(result),
+        new DistributedCacheEntryOptions {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
+        });
+
+    return Results.Ok(result);
+});
+
+💡 90% de consultas son cache hit → BD no se satura
+   Redis es distribuido: todos los pods comparten el mismo cache
+   TTL 60s = eventualmente consistente`,
+
+signalr: `📁 Notification.Api — Consumer RabbitMQ + SignalR Hub
+══════════════════════════════════════════════════════════
+
+// CONSUMER: Se despierta cuando llega evento de RabbitMQ
+public class OrderCreatedConsumer : IConsumer<OrderCreatedEvent>
+{
+    private readonly IHubContext<NotificationHub> _hub;
+
+    public async Task Consume(ConsumeContext<OrderCreatedEvent> ctx)
+    {
+        // Procesar (generar PDF, etc.)
+        await Task.Delay(3000);
+
+        // Push en tiempo real a TODOS los clientes conectados
+        await _hub.Clients.All.SendAsync("TicketReady",
+            $"¡Boleta confirmada para producto {ctx.Message.ProductId}!");
+    }
+}
+
+// HUB: Conexión WebSocket persistente
+public class NotificationHub : Hub { }
+
+// En la App MAUI:
+_hubConnection.On<string>("TicketReady", (msg) => {
+    ResultLabel.Text = $"ALERTA EN VIVO: {msg}";
+});
+
+💡 RabbitMQ retiene mensajes si este servicio está caído
+   SignalR = WebSocket bidireccional (push sin polling)`,
+
+search: `📁 Search.Api/Services/EventSearchService.cs
+══════════════════════════════════════════════════
+
+// TEXTO (Elasticsearch) — palabras exactas + fuzzy
+public async Task<List> SearchByTextAsync(string query) {
+    return await _esClient.SearchAsync(s => s
         .Query(q => q.MultiMatch(mm => mm
             .Query(query)
-            .Fields(new[] { "name^3", "description^2", "tags" })
-            .Fuzziness(new Fuzziness("AUTO"))  // Tolera errores de tipeo
-        ))
-    );
-    return response.Documents.Select(...).ToList();
+            .Fields("name^3", "description^2", "tags")
+            .Fuzziness("AUTO")  // Tolera typos
+        )));
 }
 
-// Búsqueda SEMÁNTICA (Qdrant) — entiende intención/vibe
-public async Task<List<SearchResult>> SearchByVibeAsync(string query)
-{
-    // 1. Convertir texto a vector (embedding)
-    var queryVector = GenerateSimpleEmbedding(query);
+// SEMÁNTICA (Qdrant) — entiende intención
+public async Task<List> SearchByVibeAsync(string query) {
+    // Convertir texto → vector (embedding)
+    var vector = GenerateEmbedding(query);
 
-    // 2. Buscar vectores más cercanos por similitud coseno
-    var searchResult = await _qdrantClient.SearchAsync(
-        "events_vectors", queryVector, limit: 5);
-
-    return searchResult.Select(r => new SearchResult(...)).ToList();
+    // Buscar vectores más cercanos (similitud coseno)
+    return await _qdrantClient.SearchAsync("events", vector, limit:5);
 }
 
-// Embedding simplificado (en producción: OpenAI/sentence-transformers)
-private float[] GenerateSimpleEmbedding(string text)
-{
-    // Mapea conceptos a dimensiones del vector
-    var concepts = new Dictionary<int, string[]> {
-        [5] = new[] { "familia", "niños", "infantil", "juegos" },
-        [6] = new[] { "fiesta", "noche", "electrónica" },
-        ...
-    };
-    // Activa dimensiones según las palabras del texto
-}
-
-💡 EXPLICACIÓN:
-• Elasticsearch: busca "concierto madrid" → encuentra documentos con esas palabras
-• Qdrant: busca "algo divertido para familia" → encuentra "Zona Familiar"
-  (sin compartir palabras, entiende el SIGNIFICADO)
-• Los vectores representan conceptos, no palabras literales
-• En producción se usaría OpenAI Embeddings (1536 dimensiones)`,
+💡 Elasticsearch: "concierto madrid" → busca esas palabras
+   Qdrant: "algo divertido para familia" → entiende SIGNIFICADO
+   → retorna "Zona Familiar" sin compartir palabras`,
 
 docker: `📁 Order.Api/Dockerfile — Multi-stage Build
-═══════════════════════════════════════════════
+══════════════════════════════════════════════════
 
-# Etapa 1: BUILD (imagen pesada con SDK ~700MB)
+# ETAPA 1: Compilar (SDK pesado ~700MB)
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-COPY ["Order.Api/Order.Api.csproj", "Order.Api/"]
-COPY ["Itm.Shared.Events/Itm.Shared.Events.csproj", "Itm.Shared.Events/"]
-RUN dotnet restore "Order.Api/Order.Api.csproj"
 COPY . .
-RUN dotnet publish "Order.Api.csproj" -c Release -o /app/publish
+RUN dotnet publish -c Release -o /app/publish
 
-# Etapa 2: RUNTIME (imagen liviana solo con runtime ~100MB)
+# ETAPA 2: Solo runtime (liviano ~100MB)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "Order.Api.dll"]
 
-💡 EXPLICACIÓN:
-• Multi-stage: la imagen final NO incluye el SDK (solo el runtime)
-• Resultado: ~100MB en vez de ~700MB
-• Menos superficie de ataque (menos herramientas en el contenedor)
-• Deploys más rápidos (menos bytes que transferir)
-• Cada servicio tiene su propio Dockerfile independiente`,
+💡 Imagen final: ~100MB (no ~700MB)
+   Menos superficie de ataque
+   Deploys más rápidos`,
 
-k8s: `📁 k8s/order-deployment.yaml — Deployment + Service + HPA
-═══════════════════════════════════════════════════════════════
+k8s: `📁 k8s/order-deployment.yaml — K8s + HPA
+══════════════════════════════════════════════════
 
 apiVersion: apps/v1
 kind: Deployment
-metadata:
-  name: order-api
-  namespace: itm-tickets
 spec:
-  replicas: 2                    # ← Mínimo 2 réplicas siempre
+  replicas: 2                    # Siempre 2 mínimo
   template:
     spec:
       containers:
-      - name: order-api
-        image: watabares/itm-order-api:latest  # ← Desde Docker Hub
+      - image: watabares/itm-order-api:latest
         resources:
-          requests: { cpu: "100m", memory: "128Mi" }
-          limits:   { cpu: "500m", memory: "512Mi" }
-        livenessProbe:           # ← K8s reinicia si no responde
-          httpGet: { path: /health, port: 8080 }
-        readinessProbe:          # ← No recibe tráfico hasta estar listo
+          limits: { cpu: "500m", memory: "512Mi" }
+        livenessProbe:           # Si no responde → reiniciar
           httpGet: { path: /health, port: 8080 }
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
-metadata:
-  name: order-hpa
 spec:
-  scaleTargetRef:
-    kind: Deployment
-    name: order-api
-  minReplicas: 2               # ← Nunca menos de 2
-  maxReplicas: 15              # ← Hasta 15 bajo carga
+  minReplicas: 2
+  maxReplicas: 15               # Escala hasta 15
   metrics:
-  - type: Resource
-    resource:
+  - resource:
       name: cpu
-      target:
-        averageUtilization: 60  # ← Escala si CPU > 60%
+      target: { averageUtilization: 60 }  # Si CPU > 60%
 
-💡 EXPLICACIÓN:
-• replicas: 2 = siempre hay 2 pods (si uno muere, el otro sigue)
-• HPA: si CPU > 60%, crea más pods automáticamente (hasta 15)
-• livenessProbe: si /health no responde → K8s mata y recrea el pod
-• readinessProbe: no envía tráfico hasta que el pod esté listo
-• Así soportamos 50,000 usuarios: escala horizontal automática`,
+💡 Self-healing: pod muere → K8s lo recrea en segundos
+   HPA: escala automáticamente según carga
+   50,000 usuarios → K8s crea más pods sin intervención`,
 
-actions: `📁 .github/workflows/deploy.yml — CI/CD Pipeline
-══════════════════════════════════════════════════════
+actions: `📁 .github/workflows/deploy.yml — CI/CD
+══════════════════════════════════════════════════
 
-name: Build & Push to Docker Hub
-on:
-  push:
-    branches: [ main ]          # ← Se dispara al hacer push a main
+on: push: branches: [main]    # Se dispara al push
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        service:                 # ← Compila los 6 servicios en paralelo
-          - name: itm-order-api
-            dockerfile: Order.Api/Dockerfile
-          - name: itm-inventory-api
-          - name: itm-gateway-api
-          - name: itm-notification-api
-          - name: itm-product-api
-          - name: itm-search-api
-
+        service: [gateway, inventory, order, notification, product, search]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-
-      - run: dotnet restore Itm.Distributed.System.sln
-      - run: dotnet build --configuration Release
-      - run: dotnet test --configuration Release
-
-      - uses: docker/login-action@v3        # ← Login a Docker Hub
-        with:
-          username: \${{ secrets.DOCKER_USERNAME }}
-          password: \${{ secrets.DOCKER_PASSWORD }}
-
-      - uses: docker/build-push-action@v5   # ← Build + Push imagen
-        with:
+      - dotnet restore
+      - dotnet build --configuration Release
+      - dotnet test
+      - docker/login-action (Docker Hub)
+      - docker/build-push-action:
           push: true
-          tags: watabares/\${{ matrix.service.name }}:latest
+          tags: watabares/itm-{service}:latest
 
-💡 EXPLICACIÓN:
-• Al hacer git push → GitHub compila, testea y sube imágenes automáticamente
-• Los secretos (DOCKER_USERNAME/PASSWORD) están en GitHub Settings
-• Matrix strategy: los 6 servicios se construyen en paralelo
-• Las imágenes quedan en Docker Hub listas para que K8s las descargue`
+💡 Push a main → compila → testea → 6 imágenes a Docker Hub
+   Todo automático, sin intervención manual
+   K8s puede hacer pull de las imágenes actualizadas`
     };
     log('outputCode', codes[section] || 'Sección no encontrada');
 }

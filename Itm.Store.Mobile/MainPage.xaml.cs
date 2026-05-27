@@ -1,4 +1,4 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using Microsoft.AspNetCore.SignalR.Client; // Cliente de SignalR para conectarnos al Hub desde la App Móvil
 using Microsoft.Maui.ApplicationModel; // MainThread
 using Microsoft.Maui.Storage; // SecureStorage
@@ -27,7 +27,11 @@ public partial class MainPage : ContentPage
         // 1. Configuramos el tubo hacia el Gateway (El Gateway lo pasará al Notification.Api)
         // OJO: Recuerden usar usar 10.0.2.2:5000 en Android y localhost:5000 en iOS, porque el emulador de Android no puede usar localhost para referirse a la máquina host, debe usar esta IP especial.
         _hubConnection = new HubConnectionBuilder()
-            .WithUrl("http://10.0.2.2:5000/hubs/notifications") // URL del Hub de SignalR
+            #if WINDOWS
+            .WithUrl("http://localhost:5110/hubs/notifications")
+#else
+            .WithUrl("http://10.0.2.2:5110/hubs/notifications")
+#endif // URL del Hub de SignalR
             .WithAutomaticReconnect() // Resilencia: si se cael Wifi, el va a tratar de reconectar solo. Habilitamos la reconexión automática en caso de pérdida de conexión
             .Build();
 
@@ -67,13 +71,49 @@ public partial class MainPage : ContentPage
         // y nos devolvió este JWT. En un caso real, haríamos un POST /api/login.
         // Debe coincidir con Issuer = ItmIdentityServer, Audience = ItmStoreApis y SecretKey = ITM-Super-Secret-Key-For-JWT-Class-2026-Nivel5
         // configurados en Itm.Inventory.Api/appsettings.json.
-        string simulatedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJJdG1JZGVudGl0eVNlcnZlciIsImF1ZCI6Ikl0bVN0b3JlQXBpcyIsImVtYWlsIjoiYWRtaW5AaXRtLmVkdS5jbyIsInJvbGUiOiJBZG1pbmlzdHJhZG9yIn0.PaSdxe8NkHzbkrTA40janIgKn4gnVp63yWh_cenvUDw"; //"PASTE_AQUI_UN_JWT_VALIDO_PARA_ItmIdentityServer_ItmStoreApis" Validar en la pagina https://www.jwt.io/
+        string simulatedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJJdG1JZGVudGl0eVNlcnZlciIsImF1ZCI6Ikl0bVN0b3JlQXBpcyIsImVtYWlsIjoiYWRtaW5AaXRtLmVkdS5jbyIsInJvbGUiOiJBZG1pbmlzdHJhZG9yIiwiZXhwIjoxODExMzgxMjU4fQ.IlyaPSYpWmm6BOGTy5OPdROMcaowOo7rImd8A2HUcX8"; //"PASTE_AQUI_UN_JWT_VALIDO_PARA_ItmIdentityServer_ItmStoreApis" Validar en la pagina https://www.jwt.io/
 
         //  SEGURIDAD NIVEL 5: Lo guardamos en la bóveda criptográfica del celular
         await SecureStorage.Default.SetAsync("jwt_token", simulatedToken);
 
         ResultLabel.Text = " ¡Token JWT guardado seguro en el dispositivo!";
         ResultLabel.TextColor = Colors.Green;
+    }
+
+    
+    private async void OnBuyClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            ResultLabel.Text = "Comprando boleta via Gateway...";
+            ResultLabel.TextColor = Colors.Orange;
+
+            var client = _httpClientFactory.CreateClient("GatewayClient");
+
+            var orderData = new { productId = 1, quantity = 1, sede = "Medellin", userEmail = "estudiante@itm.edu.co" };
+            var json = System.Text.Json.JsonSerializer.Serialize(orderData);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync("/api/orders", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var data = await response.Content.ReadAsStringAsync();
+                ResultLabel.Text = $"✅ BOLETA COMPRADA:\n{data}\n\n⏳ Esperando confirmación SignalR...";
+                ResultLabel.TextColor = Colors.Green;
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                ResultLabel.Text = $"⚠️ SAGA Compensación:\n{error}";
+                ResultLabel.TextColor = Colors.Orange;
+            }
+        }
+        catch (Exception ex)
+        {
+            ResultLabel.Text = $"❌ ERROR:\n{ex.Message}";
+            ResultLabel.TextColor = Colors.Red;
+        }
     }
 
     private async void OnGetDataClicked(object sender, EventArgs e)
@@ -110,3 +150,5 @@ public partial class MainPage : ContentPage
         }
     }
 }
+
+
