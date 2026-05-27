@@ -17,19 +17,19 @@ builder.Services.AddHealthChecks();
 // ARQUITECTURA: Registramos los HttpClientFactory
 builder.Services.AddHttpClient("InventoryClient", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5293");
+    client.BaseAddress = new Uri(builder.Configuration["InventoryApiUrl"] ?? "http://localhost:5293");
     client.Timeout = TimeSpan.FromSeconds(5);
 });
 
 builder.Services.AddHttpClient("PriceClient", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5012");
+    client.BaseAddress = new Uri(builder.Configuration["PriceApiUrl"] ?? "http://localhost:5012");
 });
 
 // REGISTRO DE ARQUITECTURA: CACHÉ DISTRIBUIDA (NIVEL 5)
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = "localhost:6379";
+    options.Configuration = builder.Configuration["Redis:Configuration"] ?? "localhost:6379";
     options.InstanceName = "ItmTickets_";
 });
 
@@ -173,3 +173,4 @@ app.Run();
 // ---------------------------------------------------------
 internal record InventoryResponse(int ProductId, int Stock, string Sku);
 internal record PriceResponse(int ProductId, decimal Amount, string Currency);
+

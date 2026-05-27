@@ -190,11 +190,11 @@
                 <div class="p-2 mb-2 rounded" style="background:#fce4ec; border:1px solid #f8bbd0;">
                     <strong class="small">🧪 Demo: Desacoplamiento Temporal (impresiona al docente)</strong>
                     <ol class="small mb-0 mt-1">
-                        <li>Detener Notification.Api → <button class="btn btn-xs btn-outline-danger" style="font-size:10px; padding:1px 6px;" onclick="copyCmd('taskkill /FI \"WINDOWTITLE eq Notification*\" /F')">Copiar comando kill</button></li>
+                        <li>Detener Notification.Api → <button class="btn btn-xs btn-outline-danger" style="font-size:10px; padding:1px 6px;" onclick="copyCmd('docker stop itm-notification-api')">Copiar comando stop</button></li>
                         <li>Hacer una compra desde el panel (Tab B) → <strong>funciona normalmente</strong> (200 OK)</li>
                         <li>Explicar: <em>"El mensaje quedó retenido en la cola de RabbitMQ"</em></li>
-                        <li>Abrir CloudAMQP → <a href="https://moose.rmq.cloudamqp.com/#/queues/miqffttk" target="_blank" class="small">Ver cola con mensaje pendiente</a> <span class="text-muted small">(user: miqffttk / pass: 1pscfTN1wGyzJHwe8BTEFMyocp9U-bEp)</span></li>
-                        <li>Volver a levantar Notification → <button class="btn btn-xs btn-outline-success" style="font-size:10px; padding:1px 6px;" onclick="copyCmd('cd C:\\Users\\watabares_solati\\ITM\\ProgramacionDistribuida\\Entregables\\Final && dotnet run --project Notification.Api --launch-profile http')">Copiar comando start</button></li>
+                        <li>Abrir CloudAMQP → <a href="https://shark.rmq.cloudamqp.com/#/queues" target="_blank" class="small">Ver cola con mensaje pendiente</a> <span class="text-muted small">(user: wnrvwmor / pass: XBWoL08qUao6Rfa0zhjN0qw3U-iYYf8P)</span></li>
+                        <li>Volver a levantar Notification → <button class="btn btn-xs btn-outline-success" style="font-size:10px; padding:1px 6px;" onclick="copyCmd('docker start itm-notification-api')">Copiar comando start</button></li>
                         <li>Ver en terminal: <code>"Procesando evento de RabbitMQ para orden: ..."</code> → ¡Se procesó el mensaje retenido!</li>
                     </ol>
                 </div>
@@ -295,33 +295,75 @@
 
         <!-- TAB Setup -->
         <div class="tab-pane fade" id="tabSetup">
-            <h5 class="mb-3"><i class="fas fa-cog me-2"></i>Setup Inicial (ejecutar antes de la demo)</h5>
+            <h5 class="mb-3"><i class="fas fa-cog me-2"></i>Setup y Control de Servicios</h5>
             <div class="row g-3">
                 <div class="col-md-6">
-                    <div class="card">
+                    <div class="card mb-3">
+                        <div class="card-header"><i class="fas fa-rocket me-2"></i>Levantar TODO (desde cero)</div>
                         <div class="card-body">
-                            <h6>1. Levantar infraestructura</h6>
-                            <code class="d-block bg-light p-2 rounded small mb-2">docker compose up -d rabbitmq redis elasticsearch qdrant</code>
-                            <h6>2. Iniciar servicios .NET</h6>
-                            <code class="d-block bg-light p-2 rounded small mb-2">start-all.cmd</code>
-                            <h6>3. Seed de búsqueda</h6>
-                            <button class="btn btn-sm btn-outline-success btn-demo" onclick="seedSearch()"><i class="fas fa-database me-1"></i>Seed Elasticsearch + Qdrant</button>
+                            <p class="small text-muted">Si se apagó la laptop o Docker se reinició:</p>
+                            <button class="btn btn-sm btn-success btn-demo w-100 mb-2" onclick="copyCmd('cd C:\\Users\\watabares_solati\\ITM\\ProgramacionDistribuida\\Entregables\\Final && docker compose up -d --build')"><i class="fas fa-play me-1"></i>1. Levantar TODO en Docker (copiar)</button>
+                            <button class="btn btn-sm btn-outline-success btn-demo w-100 mb-2" onclick="seedSearch()"><i class="fas fa-database me-1"></i>2. Seed Búsqueda</button>
+                            <button class="btn btn-sm btn-outline-primary btn-demo w-100 mb-2" onclick="launchMaui()"><i class="fas fa-mobile-alt me-1"></i>3. Lanzar App MAUI (copiar)</button>
+                            <button class="btn btn-sm btn-outline-info btn-demo w-100 mb-2" onclick="copyCmd('kubectl apply -f k8s/')"><i class="fas fa-dharmachakra me-1"></i>4. Aplicar Kubernetes (copiar)</button>
+                            <button class="btn btn-sm btn-outline-info btn-demo w-100" onclick="checkHealth()"><i class="fas fa-heartbeat me-1"></i>5. Verificar Health</button>
                             <div class="output-box mt-2" id="outputSetup" style="max-height:120px">Esperando...</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="card">
+                    <div class="card mb-3">
+                        <div class="card-header" style="background:#c62828;"><i class="fas fa-tools me-2"></i>Plan B — Control Individual de Servicios</div>
                         <div class="card-body">
-                            <h6>4. Lanzar App MAUI</h6>
-                            <button class="btn btn-sm btn-outline-primary btn-demo mb-2" onclick="launchMaui()"><i class="fas fa-mobile-alt me-1"></i>Copiar comando MAUI</button>
-                            <h6>5. Aplicar Kubernetes</h6>
-                            <code class="d-block bg-light p-2 rounded small mb-2">kubectl apply -f k8s/</code>
-                            <h6>6. Verificar todo</h6>
-                            <button class="btn btn-sm btn-outline-info btn-demo" onclick="checkHealth()"><i class="fas fa-heartbeat me-1"></i>Health Check</button>
-                            <div class="output-box mt-2" id="outputHealth" style="max-height:120px">Esperando...</div>
+                            <p class="small text-muted mb-2">Detener/levantar servicios individualmente (para demos de resiliencia):</p>
+                            <table class="table table-sm small mb-0">
+                                <thead><tr><th>Servicio</th><th>Detener</th><th>Levantar</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Order.Api</td><td><button class="btn btn-outline-danger btn-sm" style="font-size:10px" onclick="copyCmd('docker stop itm-order-api')">Stop</button></td><td><button class="btn btn-outline-success btn-sm" style="font-size:10px" onclick="copyCmd('docker start itm-order-api')">Start</button></td></tr>
+                                    <tr><td>Inventory.Api</td><td><button class="btn btn-outline-danger btn-sm" style="font-size:10px" onclick="copyCmd('docker stop itm-inventory-api')">Stop</button></td><td><button class="btn btn-outline-success btn-sm" style="font-size:10px" onclick="copyCmd('docker start itm-inventory-api')">Start</button></td></tr>
+                                    <tr><td>Notification.Api</td><td><button class="btn btn-outline-danger btn-sm" style="font-size:10px" onclick="copyCmd('docker stop itm-notification-api')">Stop</button></td><td><button class="btn btn-outline-success btn-sm" style="font-size:10px" onclick="copyCmd('docker start itm-notification-api')">Start</button></td></tr>
+                                    <tr><td>Product.Api</td><td><button class="btn btn-outline-danger btn-sm" style="font-size:10px" onclick="copyCmd('docker stop itm-product-api')">Stop</button></td><td><button class="btn btn-outline-success btn-sm" style="font-size:10px" onclick="copyCmd('docker start itm-product-api')">Start</button></td></tr>
+                                    <tr><td>Search.Api</td><td><button class="btn btn-outline-danger btn-sm" style="font-size:10px" onclick="copyCmd('docker stop itm-search-api')">Stop</button></td><td><button class="btn btn-outline-success btn-sm" style="font-size:10px" onclick="copyCmd('docker start itm-search-api')">Start</button></td></tr>
+                                    <tr><td>Gateway.Api</td><td><button class="btn btn-outline-danger btn-sm" style="font-size:10px" onclick="copyCmd('docker stop itm-gateway-api')">Stop</button></td><td><button class="btn btn-outline-success btn-sm" style="font-size:10px" onclick="copyCmd('docker start itm-gateway-api')">Start</button></td></tr>
+                                </tbody>
+                            </table>
+                            <hr class="my-2">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-danger btn-sm" onclick="copyCmd('docker compose -f C:\\Users\\watabares_solati\\ITM\\ProgramacionDistribuida\\Entregables\\Final\\docker-compose.yml down')"><i class="fas fa-stop me-1"></i>Detener TODO</button>
+                                <button class="btn btn-outline-success btn-sm" onclick="copyCmd('docker compose -f C:\\Users\\watabares_solati\\ITM\\ProgramacionDistribuida\\Entregables\\Final\\docker-compose.yml up -d')"><i class="fas fa-play me-1"></i>Levantar TODO</button>
+                                <button class="btn btn-outline-info btn-sm" onclick="copyCmd('docker ps --format \"table {{.Names}}\\t{{.Status}}\"')"><i class="fas fa-list me-1"></i>Ver estado</button>
+                            </div>
                         </div>
                     </div>
+                    <div class="card">
+                        <div class="card-header" style="background:#1565c0;"><i class="fas fa-link me-2"></i>Links y Verificación</div>
+                        <div class="card-body">
+                            <a href="https://shark.rmq.cloudamqp.com/#/queues" target="_blank" class="btn btn-sm btn-outline-warning btn-demo w-100 mb-1"><i class="fas fa-rabbit me-1"></i>CloudAMQP — Ver colas</a>
+                            <button class="btn btn-sm btn-outline-dark btn-demo w-100 mb-1" onclick="copyCmd('wsl gh run list --repo watabares/ITM-Tickets-Final --limit 5')"><i class="fab fa-github me-1"></i>GitHub Actions — Ver pipeline (CLI)</button>
+                            <button class="btn btn-sm btn-outline-primary btn-demo w-100 mb-2" onclick="copyCmd('docker images --format \"table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}\" | findstr itm')"><i class="fab fa-docker me-1"></i>Docker Hub — Ver imágenes locales</button>
+                            <hr class="my-2">
+                            <p class="small fw-bold mb-1">Verificación manual por servicio:</p>
+                            <div class="d-flex flex-wrap gap-1">
+                                <button class="btn btn-outline-secondary btn-sm" style="font-size:10px" onclick="copyCmd('curl http://localhost:5004/swagger/index.html')">Order (5004)</button>
+                                <button class="btn btn-outline-secondary btn-sm" style="font-size:10px" onclick="copyCmd('curl http://localhost:5002/swagger/index.html')">Inventory (5002)</button>
+                                <button class="btn btn-outline-secondary btn-sm" style="font-size:10px" onclick="copyCmd('curl http://localhost:5005/swagger/index.html')">Product (5005)</button>
+                                <button class="btn btn-outline-secondary btn-sm" style="font-size:10px" onclick="copyCmd('curl http://localhost:5100/swagger/index.html')">Search (5100)</button>
+                                <button class="btn btn-outline-secondary btn-sm" style="font-size:10px" onclick="copyCmd('curl http://localhost:5006/')">Notification (5006)</button>
+                                <button class="btn btn-outline-secondary btn-sm" style="font-size:10px" onclick="copyCmd('curl http://localhost:5000/monitor')">Gateway (5000)</button>
+                                <button class="btn btn-outline-secondary btn-sm" style="font-size:10px" onclick="copyCmd('curl http://localhost:9200')">Elasticsearch</button>
+                                <button class="btn btn-outline-secondary btn-sm" style="font-size:10px" onclick="copyCmd('curl http://localhost:6333/dashboard')">Qdrant</button>
+                                <button class="btn btn-outline-secondary btn-sm" style="font-size:10px" onclick="copyCmd('docker logs itm-order-api --tail 5')">Logs Order</button>
+                                <button class="btn btn-outline-secondary btn-sm" style="font-size:10px" onclick="copyCmd('docker logs itm-notification-api --tail 5')">Logs Notification</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6><i class="fas fa-heartbeat me-2"></i>Health Check</h6>
+                    <button class="btn btn-sm btn-outline-info btn-demo" onclick="checkHealth()"><i class="fas fa-heartbeat me-1"></i>Verificar servicios</button>
+                    <div class="output-box mt-2" id="outputHealth" style="max-height:120px">Esperando...</div>
                 </div>
             </div>
         </div>
@@ -344,7 +386,7 @@ const useProxy = (window.location.port === '8080');
 const DIRECT = { order: 'http://localhost:5027', inventory: 'http://localhost:5293', product: 'http://localhost:5298', price: 'http://localhost:5012', search: 'http://localhost:5100', gateway: 'http://localhost:5110', notification: 'http://localhost:5089' };
 function svcUrl(svc, path) { return useProxy ? path : DIRECT[svc] + path; }
 function log(id, msg) { const el = document.getElementById(id); if(el){el.textContent = msg; el.scrollTop = el.scrollHeight;} }
-function copyCmd(cmd) { navigator.clipboard.writeText(cmd).then(() => alert('📋 Copiado al portapapeles')).catch(() => prompt('Copia este comando:', cmd)); }
+function copyCmd(cmd) { navigator.clipboard.writeText(cmd).then(() => { const t=document.createElement('div'); t.textContent='📋 Copiado!'; t.style.cssText='position:fixed;top:10px;right:10px;background:#00843D;color:#fff;padding:8px 16px;border-radius:8px;z-index:9999;font-size:13px;'; document.body.appendChild(t); setTimeout(()=>t.remove(),1500); }).catch(() => prompt('Copia este comando:', cmd)); }
 
 async function comprarBoleta() {
     log('outputCompra', '⏳ Enviando orden...');
@@ -425,7 +467,7 @@ async function testRateLimit() {
 function showTerraform() { log('outputTerraform', `# terraform/main.tf\n\nresource "aws_vpc" "main" {\n  cidr_block = "10.0.0.0/16"\n}\n\nresource "aws_eks_cluster" "main" {\n  name = "itm-tickets-cluster"\n  version = "1.29"\n}\n\nresource "aws_eks_node_group" "workers" {\n  instance_types = ["t3.medium"]\n  scaling_config {\n    desired = 3, min = 2, max = 6\n  }\n}\n\n# terraform plan → muestra qué crearía\n# terraform apply → crea la infra real en AWS`); }
 function launchMaui() { const cmd='cd C:\\Users\\watabares_solati\\ITM\\ProgramacionDistribuida\\Entregables\\Final && dotnet run --project Itm.Store.Mobile -f net8.0-windows10.0.19041.0 -p:TargetFrameworks=net8.0-windows10.0.19041.0'; navigator.clipboard.writeText(cmd); log('outputSetup', `📋 Copiado! Pega en terminal.\n\n1. Click "Iniciar Sesión" → guarda JWT\n2. Click "Consultar Producto" → llama Gateway`); }
 async function seedSearch() { log('outputSetup', '⏳ Indexando...'); try { const r=await fetch(svcUrl('search','/api/search/seed'),{method:'POST'}); const d=await r.json(); log('outputSetup', `✅ ${d.message}`); } catch(e){log('outputSetup',`❌ ${e.message}`);} }
-async function checkHealth() { log('outputHealth', '⏳ Verificando...'); const svcs=[{n:'Order',p:'/api/orders'},{n:'Product',p:'/api/products/1'},{n:'Price',p:'/api/prices/1'},{n:'Search',p:'/api/search/text?q=t'},{n:'Notification',p:'/api/notification'}]; let o=''; for(const s of svcs){try{const r=await fetch(svcUrl(s.n.toLowerCase(),s.p),{signal:AbortSignal.timeout(4000)});o+=`${r.status<500?'✅':'⚠️'} ${s.n}\n`;}catch(e){o+=`❌ ${s.n}\n`;}} log('outputHealth',o); }
+async function checkHealth() { log('outputHealth', '⏳ Verificando...'); const svcs=[{n:'Order',p:'/api/orders'},{n:'Product',p:'/api/products/1'},{n:'Price',p:'/api/prices/1'},{n:'Search',p:'/api/search/text?q=t'},{n:'Notification',p:'/api/notification'}]; let o=''; for(const s of svcs){try{const r=await fetch(s.p,{signal:AbortSignal.timeout(4000)});o+=`${r.status<500?'✅':'⚠️'} ${s.n} — ${r.status<500?'Activo':'Error '+r.status}\n`;}catch(e){o+=`❌ ${s.n} — No responde\n`;}} log('outputHealth',o); }
 </script>
 
 <script>
