@@ -306,6 +306,15 @@
                             <button class="btn btn-sm btn-outline-success btn-demo w-100 mb-2" onclick="seedSearch()"><i class="fas fa-database me-1"></i>2. Seed Búsqueda</button>
                             <button class="btn btn-sm btn-outline-primary btn-demo w-100 mb-2" onclick="launchMaui()"><i class="fas fa-mobile-alt me-1"></i>3. Lanzar App MAUI (copiar)</button>
                             <button class="btn btn-sm btn-outline-info btn-demo w-100 mb-2" onclick="copyCmd('kubectl apply -f k8s/')"><i class="fas fa-dharmachakra me-1"></i>4. Aplicar Kubernetes (copiar)</button>
+                            <div class="p-2 mb-2 rounded" style="background:#e3f2fd; border:1px solid #bbdefb; font-size:11px;">
+                                <strong>kubectl apply -f k8s/ crea:</strong><br>
+                                • 1 namespace (itm-tickets)<br>
+                                • 7 deployments (gateway, inventory, order, product, notification, search, redis+ES+qdrant)<br>
+                                • 7 services (networking interno entre pods)<br>
+                                • 4 HPAs (auto-escalado por CPU: 2→15 réplicas)<br>
+                                • 1 ingress (entrada HTTPS)<br>
+                                <em>Es la versión K8s del sistema — mismos servicios que Docker Compose pero con self-healing y auto-escalado.</em>
+                            </div>
                             <button class="btn btn-sm btn-outline-info btn-demo w-100" onclick="checkHealth()"><i class="fas fa-heartbeat me-1"></i>5. Verificar Health</button>
                             <div class="output-box mt-2" id="outputSetup" style="max-height:120px">Esperando...</div>
                         </div>
