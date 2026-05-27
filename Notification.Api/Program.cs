@@ -19,7 +19,7 @@ builder.Services.AddMassTransit(x =>
     x.UsingRabbitMq((context, cfg) =>
     {
         // En un trabajo real, esta URL debe venir de configuración segura (KeyVault / env vars)
-        cfg.Host("amqps://miqffttk:1pscfTN1wGyzJHwe8BTEFMyocp9U-bEp@moose.rmq.cloudamqp.com/miqffttk");
+        cfg.Host("amqps://wnrvwmor:XBWoL08qUao6Rfa0zhjN0qw3U-iYYf8P@shark.rmq.cloudamqp.com/wnrvwmor");
 
         // Configuramos el nombre de la "fila" donde el obrero va a escuchar
         cfg.ReceiveEndpoint("notificaciones-cola", e =>
@@ -49,3 +49,4 @@ app.MapHealthChecks("/health", new HealthCheckOptions
 });
 
 app.Run();
+
