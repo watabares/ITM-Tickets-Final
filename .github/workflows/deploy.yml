@@ -39,13 +39,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore Itm.Distributed.System.sln
+        run: dotnet restore Itm.Distributed.System.sln -p:EnableWindowsTargeting=true
 
       - name: Build solution
-        run: dotnet build Itm.Distributed.System.sln --no-restore --configuration Release
+        run: dotnet build Itm.Distributed.System.sln --no-restore --configuration Release -p:EnableWindowsTargeting=true
 
       - name: Run tests
-        run: dotnet test Itm.Distributed.System.sln --no-build --configuration Release --verbosity normal
+        run: dotnet test Itm.Distributed.System.sln --no-build --configuration Release --verbosity normal -p:EnableWindowsTargeting=true
         continue-on-error: true
 
       - name: Login to Docker Hub
