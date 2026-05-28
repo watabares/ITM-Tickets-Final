@@ -183,10 +183,4 @@ internal sealed class CloudAmqpHealthCheck : Microsoft.Extensions.Diagnostics.He
         }
     }
 }
-
-
-
-
-
-
-//CI/CD demo
+//Test Github
