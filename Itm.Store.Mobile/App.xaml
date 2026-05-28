@@ -1,14 +1,15 @@
-﻿<?xml version = "1.0" encoding = "UTF-8" ?>
+<?xml version = "1.0" encoding = "UTF-8" ?>
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:Itm.Store.Mobile"
              x:Class="Itm.Store.Mobile.App">
     <Application.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
-                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
-            </ResourceDictionary.MergedDictionaries>
+            <Color x:Key="Primary">#00843D</Color>
+            <Color x:Key="PrimaryDark">#006630</Color>
+            <Color x:Key="Accent">#FFD100</Color>
+            <Color x:Key="White">#FFFFFF</Color>
+            <Color x:Key="LightGray">#F5F7FA</Color>
+            <Color x:Key="DarkText">#1A1A2E</Color>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

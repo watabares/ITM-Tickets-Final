@@ -22,7 +22,7 @@ builder.Services.AddMassTransit(x =>
 {
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("amqps://wnrvwmor:XBWoL08qUao6Rfa0zhjN0qw3U-iYYf8P@shark.rmq.cloudamqp.com/wnrvwmor");
+        cfg.Host("amqp://guest:guest@localhost:5672/");
     });
 });
 
@@ -164,7 +164,7 @@ app.Run();
 // Health check CloudAMQP
 internal sealed class CloudAmqpHealthCheck : Microsoft.Extensions.Diagnostics.HealthChecks.IHealthCheck
 {
-    private const string AmqpUrl = "amqps://wnrvwmor:XBWoL08qUao6Rfa0zhjN0qw3U-iYYf8P@shark.rmq.cloudamqp.com/wnrvwmor";
+    private const string AmqpUrl = "amqp://guest:guest@localhost:5672/";
 
     public async Task<Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult> CheckHealthAsync(
         Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckContext context,
@@ -189,3 +189,4 @@ internal sealed class CloudAmqpHealthCheck : Microsoft.Extensions.Diagnostics.He
 
 
 
+//CI/CD demo

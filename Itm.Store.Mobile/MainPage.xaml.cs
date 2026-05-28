@@ -1,154 +1,166 @@
-using System.Net.Http;
-using Microsoft.AspNetCore.SignalR.Client; // Cliente de SignalR para conectarnos al Hub desde la App Móvil
-using Microsoft.Maui.ApplicationModel; // MainThread
-using Microsoft.Maui.Storage; // SecureStorage
-using Microsoft.Maui.Graphics; // Colors
-using Microsoft.Maui.Controls; // ContentPage, UI controls
+using System.Text;
+using System.Text.Json;
+using Itm.Store.Mobile.Services;
 
 namespace Itm.Store.Mobile;
 
 public partial class MainPage : ContentPage
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-    private HubConnection? _hubConnection; // Conexión al Hub de SignalR (nullable hasta que InitializeSignalR la cree)
+    private HttpClient? _httpClient;
+    private HttpClient? _productClient;
+    private NotificationService? _notificationService;
 
-    // Inyectamos la fábrica, tal como lo hacemos en el Backend
-    public MainPage(IHttpClientFactory httpClientFactory)
+    public MainPage()
     {
         InitializeComponent();
-        _httpClientFactory = httpClientFactory;
-
-        // Inicializamos la conexión al Hub de SignalR
-        InitializeSignalR();
     }
 
-    private async void InitializeSignalR()
+    private void EnsureClients()
     {
-        // 1. Configuramos el tubo hacia el Gateway (El Gateway lo pasará al Notification.Api)
-        // OJO: Recuerden usar usar 10.0.2.2:5000 en Android y localhost:5000 en iOS, porque el emulador de Android no puede usar localhost para referirse a la máquina host, debe usar esta IP especial.
-        _hubConnection = new HubConnectionBuilder()
-            #if WINDOWS
-            .WithUrl("http://localhost:5110/hubs/notifications")
-#else
-            .WithUrl("http://10.0.2.2:5110/hubs/notifications")
-#endif // URL del Hub de SignalR
-            .WithAutomaticReconnect() // Resilencia: si se cael Wifi, el va a tratar de reconectar solo. Habilitamos la reconexión automática en caso de pérdida de conexión
-            .Build();
-
-        // 2. Le decimos al Hub: "Cuando llegue un mensaje del servidor con el nombre 'TicketReady', haz esto"
-
-        _hubConnection.On<string>("TicketReady", (mensajeDelServidor) =>
+        if (_httpClient != null) return;
+        var handler = new AuthHandler { InnerHandler = new HttpClientHandler() };
+        _httpClient = new HttpClient(handler)
         {
-            // Esta función se ejecuta cada vez que el servidor envía un mensaje "TickerReady"
-            // El mensaje es el string que el servidor envió (Ej: "¡Tu boleta para el producto X ha sido confrimada!")
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                // Actualizamos la UI con el mensaje recibido del servidor
-                ResultLabel.Text = $" ALERTA EN VIVO: {mensajeDelServidor}";
-                ResultLabel.TextColor = Colors.Purple;
-            });
-        });
-
-        // 3.  Encendemos el radio para empezar a escuchar mensajes del servidor
-
-        try
-
+            BaseAddress = new Uri("http://localhost:5110/"),
+            Timeout = TimeSpan.FromSeconds(30)
+        };
+        var handler2 = new AuthHandler { InnerHandler = new HttpClientHandler() };
+        _productClient = new HttpClient(handler2)
         {
-            await _hubConnection.StartAsync();
-
-        }
-        catch (Exception ex)
-
-        {
-            Console.WriteLine($"Error al conectar con el Hub de SignalR: {ex.Message}");
-        }
+            BaseAddress = new Uri("http://localhost:5110/"),
+            Timeout = TimeSpan.FromSeconds(30)
+        };
     }
 
-         
     private async void OnLoginClicked(object sender, EventArgs e)
     {
-        // Simulamos que fuimos a un servidor de Identidad (IdentityServer / Auth0)
-        // y nos devolvió este JWT. En un caso real, haríamos un POST /api/login.
-        // Debe coincidir con Issuer = ItmIdentityServer, Audience = ItmStoreApis y SecretKey = ITM-Super-Secret-Key-For-JWT-Class-2026-Nivel5
-        // configurados en Itm.Inventory.Api/appsettings.json.
-        string simulatedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJJdG1JZGVudGl0eVNlcnZlciIsImF1ZCI6Ikl0bVN0b3JlQXBpcyIsImVtYWlsIjoiYWRtaW5AaXRtLmVkdS5jbyIsInJvbGUiOiJBZG1pbmlzdHJhZG9yIiwiZXhwIjoxODExMzgxMjU4fQ.IlyaPSYpWmm6BOGTy5OPdROMcaowOo7rImd8A2HUcX8"; //"PASTE_AQUI_UN_JWT_VALIDO_PARA_ItmIdentityServer_ItmStoreApis" Validar en la pagina https://www.jwt.io/
-
-        //  SEGURIDAD NIVEL 5: Lo guardamos en la bóveda criptográfica del celular
-        await SecureStorage.Default.SetAsync("jwt_token", simulatedToken);
-
-        ResultLabel.Text = " ¡Token JWT guardado seguro en el dispositivo!";
-        ResultLabel.TextColor = Colors.Green;
+        try
+        {
+            string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJJdG1JZGVudGl0eVNlcnZlciIsImF1ZCI6Ikl0bVN0b3JlQXBpcyIsImVtYWlsIjoiYWRtaW5AaXRtLmVkdS5jbyIsInJvbGUiOiJBZG1pbmlzdHJhZG9yIiwiZXhwIjoxODExMzgxMjU4fQ.IlyaPSYpWmm6BOGTy5OPdROMcaowOo7rImd8A2HUcX8";
+            await SecureStorage.Default.SetAsync("jwt_token", token);
+            LoginStatusLabel.Text = "JWT guardado en SecureStorage (cifrado DPAPI)";
+            LoginStatusLabel.TextColor = Colors.Green;
+        }
+        catch (Exception ex)
+        {
+            LoginStatusLabel.Text = ex.Message;
+            LoginStatusLabel.TextColor = Colors.Red;
+        }
     }
 
-    
-    private async void OnBuyClicked(object sender, EventArgs e)
+    private async void OnConsultarProductoClicked(object sender, EventArgs e)
     {
         try
         {
-            ResultLabel.Text = "Comprando boleta via Gateway...";
-            ResultLabel.TextColor = Colors.Orange;
-
-            var client = _httpClientFactory.CreateClient("GatewayClient");
-
-            var orderData = new { productId = 1, quantity = 1, sede = "Medellin", userEmail = "estudiante@itm.edu.co" };
-            var json = System.Text.Json.JsonSerializer.Serialize(orderData);
-            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-
-            var response = await client.PostAsync("/api/orders", content);
-
+            EnsureClients();
+            ProductResultLabel.Text = "Consultando...";
+            var response = await _productClient!.GetAsync("api/products/1");
             if (response.IsSuccessStatusCode)
             {
-                var data = await response.Content.ReadAsStringAsync();
-                ResultLabel.Text = $"✅ BOLETA COMPRADA:\n{data}\n\n⏳ Esperando confirmación SignalR...";
-                ResultLabel.TextColor = Colors.Green;
+                var json = await response.Content.ReadAsStringAsync();
+                var product = JsonSerializer.Deserialize<JsonElement>(json);
+                ProductResultLabel.Text = "Stock: " + product.GetProperty("stock") + " | SKU: " + product.GetProperty("sku");
+                ProductResultLabel.TextColor = Colors.Green;
             }
             else
             {
-                var error = await response.Content.ReadAsStringAsync();
-                ResultLabel.Text = $"⚠️ SAGA Compensación:\n{error}";
-                ResultLabel.TextColor = Colors.Orange;
+                ProductResultLabel.Text = response.StatusCode.ToString();
+                ProductResultLabel.TextColor = Colors.Orange;
             }
         }
         catch (Exception ex)
         {
-            ResultLabel.Text = $"❌ ERROR:\n{ex.Message}";
-            ResultLabel.TextColor = Colors.Red;
+            ProductResultLabel.Text = ex.Message;
+            ProductResultLabel.TextColor = Colors.Red;
         }
     }
 
-    private async void OnGetDataClicked(object sender, EventArgs e)
+    private async void OnComprarBoletaClicked(object sender, EventArgs e)
     {
         try
         {
-            ResultLabel.Text = "Consultando Gateway...";
-            ResultLabel.TextColor = Colors.Orange;
+            EnsureClients();
+            BtnComprar.IsEnabled = false;
+            CompraLoading.IsRunning = true;
+            CompraLoading.IsVisible = true;
+            CompraResultFrame.IsVisible = false;
 
-            // 1. Pedimos el cliente configurado (Él ya sabe que debe ir al Gateway y usar el AuthHandler)
-            var client = _httpClientFactory.CreateClient("GatewayClient");
+            string sede = SedePicker.SelectedItem?.ToString() ?? "Medellin";
+            int cantidad = int.Parse(CantidadPicker.SelectedItem?.ToString() ?? "1");
 
-            // 2. Hacemos la petición HTTP al Gateway (Ruta que creamos en clases pasadas)
-            var response = await client.GetAsync("/api/products/1/check-stock");
+            var orderRequest = new { productId = 1, quantity = cantidad, sede = sede, userEmail = "usuario@itm.edu.co" };
+            var json = JsonSerializer.Serialize(orderRequest);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient!.PostAsync("api/orders", content);
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<JsonElement>(responseBody);
+
+            CompraResultFrame.IsVisible = true;
 
             if (response.IsSuccessStatusCode)
             {
-                // Si el Gateway y los microservicios responden 200 OK
-                var data = await response.Content.ReadAsStringAsync();
-                ResultLabel.Text = $" ÉXITO:\n{data}";
-                ResultLabel.TextColor = Colors.Green;
+                var orderId = result.GetProperty("orderId").GetString() ?? "";
+                var latency = result.GetProperty("inventoryLatencyMs").GetInt64();
+                var newStock = result.GetProperty("newStock").GetInt32();
+
+                CompraResultFrame.BackgroundColor = Color.FromArgb("#E8F5E9");
+                CompraStatusLabel.Text = "Boleta reservada exitosamente!";
+                CompraStatusLabel.TextColor = Colors.Green;
+                CompraDetailLabel.Text = "Orden: " + orderId + "\nSede: " + sede + "\ngRPC: " + latency + "ms\nStock restante: " + newStock;
             }
             else
             {
-                ResultLabel.Text = $" ERROR {response.StatusCode}:\n{await response.Content.ReadAsStringAsync()}";
-                ResultLabel.TextColor = Colors.Red;
+                CompraResultFrame.BackgroundColor = Color.FromArgb("#FFF3E0");
+                CompraStatusLabel.Text = "SAGA Compensacion - Stock devuelto";
+                CompraStatusLabel.TextColor = Colors.Orange;
+                CompraDetailLabel.Text = responseBody;
             }
         }
         catch (Exception ex)
         {
-            // Atrapamos errores de red (Ej: El Gateway está apagado)
-            ResultLabel.Text = $" ERROR DE RED:\n{ex.Message}";
-            ResultLabel.TextColor = Colors.Red;
+            CompraResultFrame.IsVisible = true;
+            CompraResultFrame.BackgroundColor = Color.FromArgb("#FFEBEE");
+            CompraStatusLabel.Text = "Error de conexion";
+            CompraStatusLabel.TextColor = Colors.Red;
+            CompraDetailLabel.Text = ex.Message;
+        }
+        finally
+        {
+            BtnComprar.IsEnabled = true;
+            CompraLoading.IsRunning = false;
+            CompraLoading.IsVisible = false;
+        }
+    }
+
+    private async void OnConnectSignalRClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            BtnSignalR.IsEnabled = false;
+            SignalRStatusLabel.Text = "Conectando al Hub...";
+
+            _notificationService ??= new NotificationService();
+            _notificationService.OnTicketReady += (s, message) =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    NotificationFrame.IsVisible = true;
+                    NotificationLabel.Text = DateTime.Now.ToString("HH:mm:ss") + " - " + message;
+                });
+            };
+
+            await _notificationService.ConnectAsync();
+            SignalRStatusLabel.Text = "Conectado al Hub de Notificaciones";
+            SignalRStatusLabel.TextColor = Colors.Green;
+            BtnSignalR.Text = "SignalR Conectado";
+            BtnSignalR.BackgroundColor = Colors.Gray;
+        }
+        catch (Exception ex)
+        {
+            SignalRStatusLabel.Text = ex.Message;
+            SignalRStatusLabel.TextColor = Colors.Red;
+            BtnSignalR.IsEnabled = true;
         }
     }
 }
-
-

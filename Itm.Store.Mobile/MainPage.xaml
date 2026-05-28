@@ -1,34 +1,125 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Itm.Store.Mobile.MainPage">
+             x:Class="Itm.Store.Mobile.MainPage"
+             Title="ITM-Tickets"
+             BackgroundColor="{StaticResource LightGray}">
 
     <ScrollView>
-        <VerticalStackLayout Padding="30" Spacing="25">
+        <VerticalStackLayout Spacing="16" Padding="20">
 
-            <Label Text="ITM-Tickets Móvil "
-                   FontSize="28"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center" />
+            <!-- Header -->
+            <Frame BackgroundColor="{StaticResource Primary}" CornerRadius="12" Padding="16" HasShadow="True">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="🎫 ITM-Tickets" FontSize="22" FontAttributes="Bold" TextColor="White"/>
+                    <Label Text="Festival de los Dos Mundos — Medellín &amp; Madrid" FontSize="13" TextColor="#C8E6C9"/>
+                </VerticalStackLayout>
+            </Frame>
 
-            <Button x:Name="LoginBtn"
-                    Text="1. Iniciar Sesión (Guardar Token)"
-                    Clicked="OnLoginClicked"
-                    BackgroundColor="#512BD4" />
+            <!-- Sección 1: Login -->
+            <Frame CornerRadius="10" Padding="14" HasShadow="True" BackgroundColor="White">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🔐 Autenticación" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource DarkText}"/>
+                    <Label Text="Guarda el JWT en SecureStorage (cifrado nativo del dispositivo)" FontSize="12" TextColor="Gray"/>
+                    <Button Text="Iniciar Sesión" 
+                            Clicked="OnLoginClicked"
+                            BackgroundColor="{StaticResource Primary}" 
+                            TextColor="White" 
+                            CornerRadius="8"/>
+                    <Label x:Name="LoginStatusLabel" FontSize="12" TextColor="Green"/>
+                </VerticalStackLayout>
+            </Frame>
 
-            <Button x:Name="GetDataBtn"
-                    Text="2. Consultar Producto Seguramente"
-                    Clicked="OnGetDataClicked"
-                    BackgroundColor="#2b82d4" />
+            <!-- Sección 2: Consultar Producto -->
+            <Frame CornerRadius="10" Padding="14" HasShadow="True" BackgroundColor="White">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📦 Consultar Producto" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource DarkText}"/>
+                    <Label Text="GET /api/products/1 → Gateway (YARP) → Product.Api → Inventory" FontSize="12" TextColor="Gray"/>
+                    <Button Text="Consultar Stock" 
+                            Clicked="OnConsultarProductoClicked"
+                            BackgroundColor="#1976D2" 
+                            TextColor="White" 
+                            CornerRadius="8"/>
+                    <Label x:Name="ProductResultLabel" FontSize="12" TextColor="{StaticResource DarkText}"/>
+                </VerticalStackLayout>
+            </Frame>
 
-            <Label x:Name="ResultLabel"
-                   Text="Esperando acción..."
-                   TextColor="Gray"
-                   FontSize="16" />
+            <!-- Sección 3: COMPRAR BOLETA (NUEVO) -->
+            <Frame CornerRadius="10" Padding="14" HasShadow="True" BackgroundColor="White" BorderColor="{StaticResource Primary}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🎟️ Comprar Boleta" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource DarkText}"/>
+                    <Label Text="POST /api/orders → SAGA + gRPC + RabbitMQ + SignalR" FontSize="12" TextColor="Gray"/>
+
+                    <!-- Selector de Sede -->
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" RowDefinitions="Auto,Auto" RowSpacing="8">
+                        <Label Text="Sede:" VerticalOptions="Center" FontSize="13" Grid.Row="0" Grid.Column="0"/>
+                        <Picker x:Name="SedePicker" Grid.Row="0" Grid.Column="1" SelectedIndex="0">
+                            <Picker.ItemsSource>
+                                <x:Array Type="{x:Type x:String}">
+                                    <x:String>Medellin</x:String>
+                                    <x:String>Madrid</x:String>
+                                </x:Array>
+                            </Picker.ItemsSource>
+                        </Picker>
+
+                        <Label Text="Cantidad:" VerticalOptions="Center" FontSize="13" Grid.Row="1" Grid.Column="0"/>
+                        <Picker x:Name="CantidadPicker" Grid.Row="1" Grid.Column="1" SelectedIndex="0">
+                            <Picker.ItemsSource>
+                                <x:Array Type="{x:Type x:String}">
+                                    <x:String>1</x:String>
+                                    <x:String>2</x:String>
+                                    <x:String>3</x:String>
+                                </x:Array>
+                            </Picker.ItemsSource>
+                        </Picker>
+                    </Grid>
+
+                    <!-- Botón Comprar -->
+                    <Button x:Name="BtnComprar"
+                            Text="🛒 Comprar Boleta" 
+                            Clicked="OnComprarBoletaClicked"
+                            BackgroundColor="#FF6F00" 
+                            TextColor="White" 
+                            FontAttributes="Bold"
+                            CornerRadius="8"
+                            HeightRequest="48"/>
+
+                    <!-- Indicador de carga -->
+                    <ActivityIndicator x:Name="CompraLoading" IsRunning="False" IsVisible="False" Color="{StaticResource Primary}"/>
+
+                    <!-- Resultado de la compra -->
+                    <Frame x:Name="CompraResultFrame" IsVisible="False" CornerRadius="8" Padding="10" BackgroundColor="#E8F5E9">
+                        <VerticalStackLayout Spacing="4">
+                            <Label x:Name="CompraStatusLabel" FontSize="13" FontAttributes="Bold"/>
+                            <Label x:Name="CompraDetailLabel" FontSize="11" TextColor="#333"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Sección 4: Notificaciones SignalR -->
+            <Frame CornerRadius="10" Padding="14" HasShadow="True" BackgroundColor="White">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🔔 Notificaciones en Tiempo Real" FontSize="16" FontAttributes="Bold" TextColor="{StaticResource DarkText}"/>
+                    <Label Text="SignalR Hub — recibe push cuando la orden se procesa" FontSize="12" TextColor="Gray"/>
+                    <Button x:Name="BtnSignalR"
+                            Text="Conectar SignalR" 
+                            Clicked="OnConnectSignalRClicked"
+                            BackgroundColor="#7B1FA2" 
+                            TextColor="White" 
+                            CornerRadius="8"/>
+                    <Label x:Name="SignalRStatusLabel" FontSize="12" TextColor="Gray" Text="Desconectado"/>
+                    <Frame x:Name="NotificationFrame" IsVisible="False" CornerRadius="8" Padding="10" BackgroundColor="#F3E5F5">
+                        <Label x:Name="NotificationLabel" FontSize="12" TextColor="#4A148C"/>
+                    </Frame>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Footer -->
+            <Label Text="ITM — Programación Distribuida | Nivel 5" 
+                   FontSize="11" TextColor="Gray" HorizontalOptions="Center" Margin="0,10,0,0"/>
 
         </VerticalStackLayout>
     </ScrollView>
+
 </ContentPage>
-                    
-                    
-                                 

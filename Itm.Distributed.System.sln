@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Order.Api", "Order.Api\Orde
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Search.Api", "Search.Api\Search.Api.csproj", "{36A74682-EB09-4E7B-88C2-28ACA953E74D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itm.Store.Mobile", "Itm.Store.Mobile\Itm.Store.Mobile.csproj", "{C9F29BE1-D292-48C4-9528-413DAA563E5E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,5 +62,9 @@ Global
 		{36A74682-EB09-4E7B-88C2-28ACA953E74D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36A74682-EB09-4E7B-88C2-28ACA953E74D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36A74682-EB09-4E7B-88C2-28ACA953E74D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9F29BE1-D292-48C4-9528-413DAA563E5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9F29BE1-D292-48C4-9528-413DAA563E5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9F29BE1-D292-48C4-9528-413DAA563E5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9F29BE1-D292-48C4-9528-413DAA563E5E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
