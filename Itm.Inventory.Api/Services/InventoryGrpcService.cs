@@ -80,8 +80,9 @@ public class InventoryGrpcService : InventoryGrpc.InventoryGrpcBase
         var index = _inventoryDb.IndexOf(item);
         _inventoryDb[index] = item with { Stock = item.Stock - request.Quantity };
 
-        _logger.LogInformation("[gRPC] ReduceStock ProductId={ProductId} Qty={Qty} NewStock={NewStock}",
-            request.ProductId, request.Quantity, _inventoryDb[index].Stock);
+        var correlationId = context.RequestHeaders.GetValue("x-correlation-id") ?? "N/A";
+        _logger.LogInformation("[gRPC] ReduceStock ProductId={ProductId} Qty={Qty} NewStock={NewStock} CorrelationId={CorrId}",
+            request.ProductId, request.Quantity, _inventoryDb[index].Stock, correlationId);
 
         return Task.FromResult(new ReduceStockReply
         {

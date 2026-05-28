@@ -62,18 +62,19 @@ app.MapPost(
         var correlationId = httpContext.Request.Headers["X-Correlation-ID"].FirstOrDefault() ?? Guid.NewGuid().ToString("N")[..12];
         using var scope = logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId });
 
-        logger.LogInformation("=== INICIO ORDEN === ProductId={ProductId} Qty={Qty} Sede={Sede}",
-            order.ProductId, order.Quantity, order.Sede);
+        logger.LogInformation("=== INICIO ORDEN === ProductId={ProductId} Qty={Qty} Sede={Sede} CorrelationId={CorrId}",
+            order.ProductId, order.Quantity, order.Sede, correlationId);
 
         // Medir latencia gRPC
         var sw = Stopwatch.StartNew();
 
         // Paso 1: Reservar stock via gRPC (comunicación binaria, <10ms latencia local)
+        var grpcHeaders = new Grpc.Core.Metadata { { "x-correlation-id", correlationId } };
         var reduceReply = await grpcClient.ReduceStockAsync(new ReduceStockRequest
         {
             ProductId = order.ProductId,
             Quantity = order.Quantity
-        });
+        }, grpcHeaders);
 
         sw.Stop();
         logger.LogInformation("[gRPC] ReduceStock respondió en {ElapsedMs}ms - Success={Success}",
@@ -105,10 +106,10 @@ app.MapPost(
             decimal finalTotal = order.Sede == "Madrid" ? 85.00m : 150000m; // EUR vs COP
 
             var orderEvent = new OrderCreatedEvent(newOrderId, order.ProductId, order.UserEmail ?? "usuario@itm.edu.co", finalTotal);
-            await publisher.Publish(orderEvent);
+            await publisher.Publish(orderEvent, ctx => { ctx.CorrelationId = Guid.TryParse(correlationId, out var cid) ? cid : Guid.NewGuid(); });
 
-            logger.LogInformation("=== ORDEN COMPLETADA === OrderId={OrderId} Total={Total} gRPC_Latency={LatencyMs}ms",
-                newOrderId, finalTotal, sw.ElapsedMilliseconds);
+            logger.LogInformation("=== ORDEN COMPLETADA === OrderId={OrderId} Total={Total} gRPC_Latency={LatencyMs}ms CorrelationId={CorrId}",
+                newOrderId, finalTotal, sw.ElapsedMilliseconds, correlationId);
 
             return Results.Ok(new
             {

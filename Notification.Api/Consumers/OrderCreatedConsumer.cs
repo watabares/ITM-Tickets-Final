@@ -1,4 +1,4 @@
-﻿using MassTransit; // <-- NUEVO IMPORT
+using MassTransit; // <-- NUEVO IMPORT
 using Itm.Shared.Events; // <-- NUEVO IMPORT
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.SignalR;
@@ -20,7 +20,8 @@ public class OrderCreatedConsumer : IConsumer<OrderCreatedEvent>
 
     public async Task Consume(ConsumeContext<OrderCreatedEvent> context)
     {
-        _logger.LogInformation("Procesando evento de RabbitMQ para orden: {OrderId}", context.Message.OrderId);
+        var correlationId = context.CorrelationId?.ToString() ?? context.MessageId?.ToString() ?? "N/A";
+        _logger.LogInformation("Procesando evento de RabbitMQ para orden: {OrderId} CorrelationId={CorrId}", context.Message.OrderId, correlationId);
 
         // Simulamos tiempo de procesamiento pesado (generación de PDF, pago , etc.)
         await Task.Delay(3000);
