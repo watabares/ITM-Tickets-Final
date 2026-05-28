@@ -473,3 +473,88 @@ O manualmente: cerrar las 7 terminales + `docker compose down`
 ---
 
 *Última actualización: 26 de mayo de 2026*
+
+---
+
+## Ejecutar en otro computador (desde cero)
+
+### Prerequisitos
+
+| Software | Versión | Verificar | Instalar |
+|---|---|---|---|
+| .NET SDK | 8.0+ | `dotnet --version` | `winget install Microsoft.DotNet.SDK.8` |
+| Docker Desktop | 4.x+ | Abrir Docker Desktop | [docker.com/desktop](https://docker.com/products/docker-desktop) |
+| Kubernetes | Incluido en Docker Desktop | `kubectl version` | Docker Desktop → Settings → Kubernetes → Enable |
+| Git | 2.x+ | `git --version` | `winget install Git.Git` |
+| GitHub CLI (opcional) | 2.x+ | `gh --version` | `winget install GitHub.cli` |
+
+### Paso 1: Clonar el repositorio
+
+```
+git clone https://github.com/watabares/ITM-Tickets-Final.git
+cd ITM-Tickets-Final
+```
+
+### Paso 2: Levantar infraestructura (Docker)
+
+```
+docker compose up -d rabbitmq redis elasticsearch qdrant
+```
+
+Esperar 15 segundos. Verificar: `docker ps` (4 contenedores corriendo).
+
+### Paso 3: Opción A — Kubernetes (producción)
+
+```
+kubectl apply -f k8s/
+kubectl get pods -n itm-tickets -w
+```
+
+Kubernetes descarga las 6 imágenes de Docker Hub (`watabares/itm-*:latest`) automáticamente. Esperar hasta que todos los pods estén en `Running`.
+
+### Paso 3: Opción B — Servicios locales (desarrollo + demo con logs)
+
+```
+start-all.cmd
+```
+
+Abre 7 terminales (una por servicio). Puertos: Gateway:5110, Order:5027, Inventory:5293, Product:5298, Price:5012, Notification:5089, Search:5100.
+
+### Paso 4: Seed de búsqueda (una sola vez)
+
+```
+curl -X POST http://localhost:5100/api/search/seed
+```
+
+### Paso 5: App MAUI (Windows)
+
+```
+dotnet run --project Itm.Store.Mobile -f net8.0-windows10.0.19041.0
+```
+
+### Paso 6: Verificar
+
+```
+curl -X POST http://localhost:5027/api/orders -H "Content-Type: application/json" -d "{\"productId\":1,\"quantity\":1,\"sede\":\"Medellin\"}"
+```
+
+Respuesta esperada: `{"status":"Boleta reservada exitosamente","orderId":"...","protocol":"gRPC","inventoryLatencyMs":2}`
+
+### URLs importantes
+
+| Recurso | URL |
+|---|---|
+| RabbitMQ Management | http://localhost:15672 (guest/guest) |
+| Elasticsearch | http://localhost:9200 |
+| Qdrant Dashboard | http://localhost:6333/dashboard |
+| Health Check (Gateway) | http://localhost:5110/monitor |
+| Panel de Demo | Abrir `demo-panel.html` en navegador |
+
+### Notas
+
+- **No se necesita compilar los microservicios** si se usa Kubernetes (Opción A) — las imágenes ya están en Docker Hub.
+- **MAUI sí requiere compilación** local (.NET 8 SDK + Windows).
+- **RabbitMQ es local** (Docker), no CloudAMQP.
+- **Kubernetes requiere** Docker Desktop con Kubernetes habilitado (Settings → Kubernetes → Enable).
+- **El archivo `terraform/main.tf`** es para desplegar en AWS EKS (no se ejecuta en la demo, solo se explica).
+
